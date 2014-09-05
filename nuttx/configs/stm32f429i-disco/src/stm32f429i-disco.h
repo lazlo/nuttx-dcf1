@@ -234,6 +234,10 @@ void stm32_pmbuttons(void);
 int nsh_archinitialize(void);
 #endif
 
+
+void up_dcf1(void); /* defined in dcf1.c */
+
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
 
