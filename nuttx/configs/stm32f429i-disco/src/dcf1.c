@@ -42,12 +42,41 @@ static const struct file_operations dcf1_ops = {
 	0,		/* ioctl */
 };
 
+static struct dcf1_dev {
+	bool	led_state;
+	sem_t	isr_sem;
+} dev;
+
 /***********************************************************************/
 /***********************************************************************/
+
+static int dcf1_interrupt(int irq, void *context)
+{
+	dev.led_state = !dev.led_state;
+	sem_post(&dev.isr_sem);
+	return OK;
+}
+
+static int dcf1_procirq(int argc, char *argv[])
+{
+	while (1)
+	{
+		sem_wait(&dev.isr_sem);
+#if 0
+		dcf1dbg("dcf1 IRQ %d\n", stm32_gpioread(GPIO_DCF1_DATA));
+#endif
+		stm32_gpiowrite(GPIO_DCF1_LED, dev.led_state);
+	}
+	return OK;
+}
 
 static void dcf1_init(void)
 {
 	dcf1dbg("dcf1_init\n");
+
+	/* Initialize the device state */
+	dev.led_state = true;
+	sem_init(&dev.isr_sem, 1, 0);
 
 	/* Setup pins */
 	stm32_configgpio(GPIO_DCF1_LED);
@@ -58,10 +87,13 @@ static void dcf1_init(void)
 	stm32_gpiowrite(GPIO_DCF1_LED, true);
 	stm32_gpiowrite(GPIO_DCF1_PON, true);
 
-	/* TODO register handler for ext. interrupt on DCF1_DATA */
+	/* Register handler for ext. interrupt on DCF1_DATA */
+	stm32_gpiosetevent(GPIO_DCF1_DATA, true, true, false, dcf1_interrupt);
 
 	/* Enable by pulling PON pin low */
 	stm32_gpiowrite(GPIO_DCF1_PON, false);
+
+	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
 }
 
 static int dcf1_open(file_t *filep)
