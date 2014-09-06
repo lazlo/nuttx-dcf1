@@ -290,8 +290,8 @@ static void dcf1_enable(const bool onoff)
 {
 	/* Enable by pulling PON pin low */
 	/* Disable receiver module by pulling pin high */
-	stm32_gpiowrite(GPIO_DCF1_PON, !onoff);
-	stm32_gpiowrite(GPIO_DCF1_LED, onoff);
+	dcf1_write_pon_pin(!onoff);
+	dcf1_write_led_pin(onoff);
 }
 
 static void dcf1_init(void)
