@@ -199,23 +199,23 @@ static char dcf1_decode(const long delta_msec)
 {
 	char bit;
 
-	dcf1dbg_de("dcf1 RX ");
+	dcf1dbg_de("dcf1 DE ");
 
 	/* Decide if the delta is a binary 1, 0 or error */
 	if (DCF1_IS_DATA_0(delta_msec))
 	{
 		bit = 0;
-		dcf1dbg_de("0 (dt %ld ms)", delta_msec);
+		dcf1dbg_de("0   (dt %3ld ms)", delta_msec);
 	}
 	else if (DCF1_IS_DATA_1(delta_msec))
 	{
 		bit = 1;
-		dcf1dbg_de("1 (dt %ld ms)", delta_msec);
+		dcf1dbg_de("1   (dt %3ld ms)", delta_msec);
 	}
 	else
 	{
 		bit = -1;
-		dcf1dbg_de("er dt %ld ms = %ld - %ld",
+		dcf1dbg_de("er  (dt %3ld ms) = %ld-%ld",
 				delta_msec,
 				dev.t_end.tv_nsec / 1000000,
 				dev.t_start.tv_nsec / 1000000);
