@@ -163,7 +163,7 @@ static long dcf1_measure(void)
 		/* Subtract t2 - t1 and display result */
 		delta_msec = (dev.t2.tv_nsec - dev.t1.tv_nsec) / 1000000;
 
-		dcf1dbg_me(" d %ld", delta_msec);
+		dcf1dbg_me(" dt %ld", delta_msec);
 	}
 	else
 	{
