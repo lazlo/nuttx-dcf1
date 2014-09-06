@@ -97,6 +97,22 @@ static struct dcf1_dev {
 /***********************************************************************/
 /***********************************************************************/
 
+static void dcf1_decode(const long delta_msec)
+{
+	dcf1dbg_s2("dcf1 RX ");
+
+	/* Decide if the delta is a binary 1, 0 or error */
+	if (DCF1_IS_DATA_0(delta_msec))
+		dcf1dbg_s2("0 (dt %d)", delta_msec);
+	else if (DCF1_IS_DATA_1(delta_msec))
+		dcf1dbg_s2("1 (dt %d)", delta_msec);
+	else
+		dcf1dbg_s2("err d %ld = (%ld - %ld) / %ld",
+				delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
+				1000000);
+	dcf1dbg_s2("\n");
+}
+
 /* Handles interrupt */
 static int dcf1_interrupt(int irq, void *context)
 {
@@ -160,18 +176,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 		if (delta_msec)
 		{
-			dcf1dbg_s2("dcf1 RX ");
-
-			/* Decide if the delta is a binary 1, 0 or error */
-			if (DCF1_IS_DATA_0(delta_msec))
-				dcf1dbg_s2("0 (dt %d)", delta_msec);
-			else if (DCF1_IS_DATA_1(delta_msec))
-				dcf1dbg_s2("1 (dt %d)", delta_msec);
-			else
-				dcf1dbg_s2("err d %ld = (%ld - %ld) / %ld",
-					delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
-					1000000);
-			dcf1dbg_s2("\n");
+			dcf1_decode(delta_msec);
 
 			delta_msec = 0;
 		}
