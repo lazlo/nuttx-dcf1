@@ -1,5 +1,17 @@
 /* Driver for the DCF1 by D. Laszlo Sitzer <dlsitzer@gmail.com> */
 
+/* To activate the driver the following configuration options need
+ * to be set:
+ *
+ * - CONFIG_CLOCK_MONOTONIC=y
+ *
+ *   RTOS Features ---> Clocks and Timers ---> [*] Support CLOCK_MONOTONIC
+ *
+ * - CONFIG_NSH_ARCHINIT=y
+ *
+ *   Application Configuration ---> NSH Library ---> [*] Have architecture-specific initialization
+ */
+
 /* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
 
 /* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
