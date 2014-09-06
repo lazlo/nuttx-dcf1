@@ -98,6 +98,8 @@ static struct dcf1_dev {
 
 	struct timespec	t1; /* Time of low to high transition of data pin */
 	struct timespec t2; /* Time of high to low transition of data pin */
+
+	uint64_t rxbuf;
 } dev;
 
 /***********************************************************************/
@@ -206,6 +208,16 @@ static int dcf1_procirq(int argc, char *argv[])
 		if (delta_msec)
 		{
 			bit = dcf1_decode(delta_msec);
+
+			/* Only modify receive buffer on successful decoding */
+			if (bit != -1)
+			{
+				/* Make space for one bit in the receive buffer */
+				dev.rxbuf <<= 1;
+
+				if (bit)
+					dev.rxbuf |= 1;
+			}
 
 			delta_msec = 0;
 		}
