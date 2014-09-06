@@ -54,7 +54,6 @@ static struct dcf1_dev {
 /* Handles interrupt */
 static int dcf1_interrupt(int irq, void *context)
 {
-	dev.led_state = !dev.led_state;
 	sem_post(&dev.isr_sem);
 	return OK;
 }
