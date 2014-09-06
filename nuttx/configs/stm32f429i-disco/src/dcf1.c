@@ -162,7 +162,7 @@ static void dcf1_decode(const long delta_msec)
 	}
 	else
 	{
-		dcf1dbg_de("err d %ld = (%ld - %ld) / %ld",
+		dcf1dbg_de("er dt %ld = (%ld - %ld) / %ld",
 				delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
 				1000000);
 	}
