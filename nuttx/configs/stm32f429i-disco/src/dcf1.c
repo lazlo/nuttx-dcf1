@@ -6,6 +6,8 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <time.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -18,6 +20,8 @@
 #define GPIO_DCF1_LED	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN2)
 #define GPIO_DCF1_PON	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN4)
 #define GPIO_DCF1_DATA	(GPIO_INPUT|GPIO_EXTI|GPIO_OPENDRAIN|GPIO_PORTF|GPIO_PIN5)
+
+#define DCF1_REFCLOCK	CLOCK_REALTIME
 
 #define dcf1dbg	printf
 
@@ -49,6 +53,9 @@ static struct dcf1_dev {
 
 	bool	data;
 	bool	data_last;
+
+	struct timespec	t1; /* Time of current low->high transition of data pin */
+	struct timespec t2; /* Time of last low->high transition of data pin */
 } dev;
 
 /***********************************************************************/
@@ -64,6 +71,8 @@ static int dcf1_interrupt(int irq, void *context)
 /* Process data */
 static int dcf1_procirq(int argc, char *argv[])
 {
+	long delta_nsec;
+
 	while (1)
 	{
 		/* Wait for interrupt to occur */
@@ -80,13 +89,21 @@ static int dcf1_procirq(int argc, char *argv[])
 		if (dev.data_last == 0 && dev.data == 1)
 		{
 			dcf1dbg(" t1");
-			/* TODO save the current time as t1 or t_START */
+
+			/* Save the current time as t1 or t_START */
+			clock_gettime(DCF1_REFCLOCK, &dev.t1);
 		}
 		else if (dev.data_last == 1 && dev.data == 0)
 		{
 			dcf1dbg(" t2");
-			/* TODO save the current time as t2 or t_END */
-			/* TODO subtract t2 - t1 and display result */
+
+			/* Save the current time as t2 or t_END */
+			clock_gettime(DCF1_REFCLOCK, &dev.t2);
+
+			/* Subtract t2 - t1 and display result */
+			delta_nsec = dev.t2.tv_nsec - dev.t1.tv_nsec;
+
+			dcf1dbg(" d %lu", delta_nsec / 1000000);
 		}
 		else
 		{
