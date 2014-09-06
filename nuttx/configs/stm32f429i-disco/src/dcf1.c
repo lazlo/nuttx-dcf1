@@ -174,7 +174,7 @@ static long dcf1_measure(void)
 		dcf1dbg_me(" t2");
 
 		/* Save the current time as t2 or t_END */
-		dcf1_getreftime(&dev.t1);
+		dcf1_getreftime(&dev.t2);
 		dcf1dbg_me("=%ld", dev.t2.tv_sec / 1000000);
 
 		/* Subtract t2 - t1 and display result */
