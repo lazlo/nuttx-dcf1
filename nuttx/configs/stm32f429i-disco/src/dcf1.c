@@ -26,6 +26,7 @@
 
 typedef FAR struct file file_t;
 
+static void	dcf1_enable(const bool onoff);
 static void	dcf1_init(void);
 
 static int	dcf1_open(file_t *filep);
@@ -72,6 +73,14 @@ static int dcf1_procirq(int argc, char *argv[])
 	return OK;
 }
 
+/* Turn the module on or off */
+static void dcf1_enable(const bool onoff)
+{
+	/* Enable by pulling PON pin low */
+	/* Disable receiver module by pulling pin high */
+	stm32_gpiowrite(GPIO_DCF1_PON, !onoff);
+}
+
 static void dcf1_init(void)
 {
 	dcf1dbg("dcf1_init\n");
@@ -95,8 +104,7 @@ static void dcf1_init(void)
 	/* Fork a process to wait for interrupts to process */
 	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
 
-	/* Enable by pulling PON pin low */
-	stm32_gpiowrite(GPIO_DCF1_PON, false);
+	dcf1_enable(true);
 }
 
 static int dcf1_open(file_t *filep)
