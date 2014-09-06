@@ -94,15 +94,26 @@
 
 typedef FAR struct file file_t;
 
+/* Functions that deal with I/O from/to GPIOs */
+
 static bool	dcf1_read_data_pin(void);
 static void	dcf1_write_pon_pin(const bool out);
 static void	dcf1_write_led_pin(const bool out);
 static void	dcf1_enable(const bool onoff);
 
+/* Time Measurement */
+
 static void	dcf1_getreftime(struct timespec *t);
+
+/* Receive Buffer Management */
+
 static void	dcf1_rxbuf_append(const bool bit);
 
+/* Initialization */
+
 static void	dcf1_init(void);
+
+/* Device File System Interface */
 
 static int	dcf1_open(file_t *filep);
 static int	dcf1_close(file_t *filep);
