@@ -25,6 +25,16 @@
 #define GPIO_DCF1_PON	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN4)
 #define GPIO_DCF1_DATA	(GPIO_INPUT|GPIO_EXTI|GPIO_OPENDRAIN|GPIO_PORTF|GPIO_PIN5)
 
+/* Specifies the clock id to use when measuring the time between DATA
+ * pin level transitions.
+ *
+ * The default for this driver is to use the monotonic clock, which is
+ * not enabled by default in NuttX.
+ *
+ * If you run menuconfig you can find the option at:
+ *
+ * RTOS Features ---> Clocks and Timers ---> [*] Support CLOCK_MONOTONIC
+ */
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
 /* Configuration for decoding the signal provided by the DCF1 module */
