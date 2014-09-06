@@ -50,6 +50,7 @@ static struct dcf1_dev {
 /***********************************************************************/
 /***********************************************************************/
 
+/* Handles interrupt */
 static int dcf1_interrupt(int irq, void *context)
 {
 	dev.led_state = !dev.led_state;
@@ -57,6 +58,7 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
+/* Process data */
 static int dcf1_procirq(int argc, char *argv[])
 {
 	while (1)
