@@ -97,6 +97,7 @@
 typedef FAR struct file file_t;
 
 static bool	dcf1_read_data_pin(void);
+static void	dcf1_write_pon_pin(const bool out);
 static void	dcf1_write_led_pin(const bool out);
 static void	dcf1_getreftime(struct timespec *t);
 static void	dcf1_rxbuf_append(const bool bit);
@@ -138,6 +139,11 @@ static struct dcf1_dev {
 static bool dcf1_read_data_pin(void)
 {
 	return stm32_gpioread(GPIO_DCF1_DATA);
+}
+
+static void dcf1_write_pon_pin(const bool out)
+{
+	stm32_gpiowrite(GPIO_DCF1_PON, out);
 }
 
 static void dcf1_write_led_pin(const bool out)
