@@ -33,6 +33,17 @@
 
 #define dcf1dbg	printf
 
+#ifdef DEBUG_DCF1_PROC_STAGE1
+# 	define dcf1dbg_s1	dcf1dbg
+#else
+#	define dcf1dbg_s1(x...)
+#endif
+#ifdef DEBUG_DCF1_PROC_STATE2
+#	define dcf1dbg_s2	dcf1dbg
+#else
+#	define dcf1dbg_s2(x...)
+#endif
+
 /***********************************************************************/
 /***********************************************************************/
 
@@ -79,16 +90,6 @@ static int dcf1_interrupt(int irq, void *context)
 /* Process data */
 static int dcf1_procirq(int argc, char *argv[])
 {
-#ifdef DEBUG_DCF1_PROC_STAGE1
-# 	define dcf1dbg_s1	dcf1dbg
-#else
-#	define dcf1dbg_s1(x...)
-#endif
-#ifdef DEBUG_DCF1_PROC_STATE2
-#	define dcf1dbg_s2	dcf1dbg
-#else
-#	define dcf1dbg_s2(x...)
-#endif
 	long delta_msec = 0;
 
 	while (1)
