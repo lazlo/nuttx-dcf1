@@ -146,9 +146,9 @@ static int dcf1_procirq(int argc, char *argv[])
 
 			/* Decide if the delta is a binary 1, 0 or error */
 			if (delta_msec > 75 && delta_msec < 125)
-				dcf1dbg_s2("0");
+				dcf1dbg_s2("0 (dt %d)", delta_msec);
 			else if (delta_msec >= 175 && delta_msec < 230)
-				dcf1dbg_s2("1");
+				dcf1dbg_s2("1 (dt %d)", delta_msec);
 			else
 				dcf1dbg_s2("err d %ld = (%ld - %ld) / %ld",
 					delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
