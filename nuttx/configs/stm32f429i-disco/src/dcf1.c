@@ -100,6 +100,49 @@ static struct dcf1_dev {
 /***********************************************************************/
 /***********************************************************************/
 
+static long dcf1_measure(void)
+{
+	long delta_msec = 0;
+
+	/* Read the current state of data */
+	dev.data = stm32_gpioread(GPIO_DCF1_DATA);
+	dcf1dbg_me("dcf1  %d", dev.data);
+
+	/* Make the LED mirror the current data state */
+	dev.led_state = dev.data;
+	stm32_gpiowrite(GPIO_DCF1_LED, dev.led_state);
+
+	if (dev.data_last == 0 && dev.data == 1)
+	{
+		dcf1dbg_me(" t1");
+
+		/* Save the current time as t1 or t_START */
+		clock_gettime(DCF1_REFCLOCK, &dev.t1);
+		dcf1dbg_me("=%ld", dev.t1.tv_nsec / 1000000);
+	}
+	else if (dev.data_last == 1 && dev.data == 0)
+	{
+		dcf1dbg_me(" t2");
+
+		/* Save the current time as t2 or t_END */
+		clock_gettime(DCF1_REFCLOCK, &dev.t2);
+		dcf1dbg_me("=%ld", dev.t2.tv_sec / 1000000);
+
+		/* Subtract t2 - t1 and display result */
+		delta_msec = (dev.t2.tv_nsec - dev.t1.tv_nsec) / 1000000;
+
+		dcf1dbg_me(" d %ld", delta_msec);
+	}
+	else
+	{
+		/* Should not happen! */
+		dcf1dbg_me(" err");
+	}
+	dcf1dbg_me("\n");
+
+	return delta_msec;
+}
+
 static void dcf1_decode(const long delta_msec)
 {
 	dcf1dbg_de("dcf1 RX ");
@@ -143,41 +186,7 @@ static int dcf1_procirq(int argc, char *argv[])
 		 * Measure low/high phase duration
 		 */
 
-		/* Read the current state of data */
-		dev.data = stm32_gpioread(GPIO_DCF1_DATA);
-		dcf1dbg_me("dcf1  %d", dev.data);
-
-		/* Make the LED mirror the current data state */
-		dev.led_state = dev.data;
-		stm32_gpiowrite(GPIO_DCF1_LED, dev.led_state);
-
-		if (dev.data_last == 0 && dev.data == 1)
-		{
-			dcf1dbg_me(" t1");
-
-			/* Save the current time as t1 or t_START */
-			clock_gettime(DCF1_REFCLOCK, &dev.t1);
-			dcf1dbg_me("=%ld", dev.t1.tv_nsec / 1000000);
-		}
-		else if (dev.data_last == 1 && dev.data == 0)
-		{
-			dcf1dbg_me(" t2");
-
-			/* Save the current time as t2 or t_END */
-			clock_gettime(DCF1_REFCLOCK, &dev.t2);
-			dcf1dbg_me("=%ld", dev.t2.tv_sec / 1000000);
-
-			/* Subtract t2 - t1 and display result */
-			delta_msec = (dev.t2.tv_nsec - dev.t1.tv_nsec) / 1000000;
-
-			dcf1dbg_me(" d %ld", delta_msec);
-		}
-		else
-		{
-			/* Should not happen! */
-			dcf1dbg_me(" err");
-		}
-		dcf1dbg_me("\n");
+		delta_msec = dcf1_measure();
 
 		/*
 		 * Decode duration into bits
