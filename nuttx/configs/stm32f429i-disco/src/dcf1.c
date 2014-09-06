@@ -48,7 +48,7 @@
 #define DCF1_DATA_1_MAX_MS	(DCF1_DATA_1_MS + DCF1_DATA_1_ERR_MS)
 #define DCF1_DATA_1_MIN_MS	(DCF1_DATA_1_MS - DCF1_DATA_1_ERR_MS)
 
-#define DCF1_IS_DATA_0(dt)	(dt > DCF1_DATA_0_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
+#define DCF1_IS_DATA_0(dt)	(dt > DCF1_DATA_0_MIN_MS && dt < DCF1_DATA_0_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt > DCF1_DATA_1_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
 
 #define dcf1dbg	printf
