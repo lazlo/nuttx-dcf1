@@ -97,10 +97,11 @@ typedef FAR struct file file_t;
 static bool	dcf1_read_data_pin(void);
 static void	dcf1_write_pon_pin(const bool out);
 static void	dcf1_write_led_pin(const bool out);
+static void	dcf1_enable(const bool onoff);
+
 static void	dcf1_getreftime(struct timespec *t);
 static void	dcf1_rxbuf_append(const bool bit);
 
-static void	dcf1_enable(const bool onoff);
 static void	dcf1_init(void);
 
 static int	dcf1_open(file_t *filep);
@@ -147,6 +148,15 @@ static void dcf1_write_pon_pin(const bool out)
 static void dcf1_write_led_pin(const bool out)
 {
 	stm32_gpiowrite(GPIO_DCF1_LED, out);
+}
+
+/* Turn the module on or off */
+static void dcf1_enable(const bool onoff)
+{
+	/* Enable by pulling PON pin low */
+	/* Disable receiver module by pulling pin high */
+	dcf1_write_pon_pin(!onoff);
+	dcf1_write_led_pin(onoff);
 }
 
 static void dcf1_getreftime(struct timespec *t)
@@ -283,15 +293,6 @@ static int dcf1_procirq(int argc, char *argv[])
 		dev.data_last = dev.data;
 	}
 	return OK;
-}
-
-/* Turn the module on or off */
-static void dcf1_enable(const bool onoff)
-{
-	/* Enable by pulling PON pin low */
-	/* Disable receiver module by pulling pin high */
-	dcf1_write_pon_pin(!onoff);
-	dcf1_write_led_pin(onoff);
 }
 
 static void dcf1_init(void)
