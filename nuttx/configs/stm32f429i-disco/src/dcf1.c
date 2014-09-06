@@ -215,8 +215,8 @@ static char dcf1_decode(const long delta_msec)
 		bit = -1;
 		dcf1dbg_de("er dt %ld ms = %ld - %ld",
 				delta_msec,
-				dev.t_start.tv_nsec / 1000000,
-				dev.t_end.tv_nsec / 1000000);
+				dev.t_end.tv_nsec / 1000000,
+				dev.t_start.tv_nsec / 1000000);
 	}
 	dcf1dbg_de("\n");
 	return bit;
