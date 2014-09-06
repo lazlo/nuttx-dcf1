@@ -25,6 +25,12 @@
 
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
+/* Measure time between DATA pin level transitions */
+//#define DEBUG_DCF1_PROC_STATE1
+
+/* Calculate bits from time delta */
+//#define DEBUG_DCF1_PROC_STATE2
+
 #define dcf1dbg	printf
 
 /***********************************************************************/
