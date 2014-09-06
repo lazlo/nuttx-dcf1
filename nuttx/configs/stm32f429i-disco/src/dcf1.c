@@ -107,6 +107,7 @@ static void dcf1_init(void)
 	/* Fork a process to wait for interrupts to process */
 	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
 
+	/* Enable the receiver module */
 	dcf1_enable(true);
 }
 
