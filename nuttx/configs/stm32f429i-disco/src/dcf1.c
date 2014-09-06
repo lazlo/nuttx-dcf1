@@ -25,6 +25,23 @@
 
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
+/* Configuration for decoding the signal provided by the DCF1 module */
+
+#define DCF1_DATA_0_MS		100
+#define DCF1_DATA_1_MS		200
+#define DCF1_DATA_ERR_MS	30
+
+#define DCF1_DATA_0_ERR_MS	DCF1_DATA_ERR_MS
+#define DCF1_DATA_0_MAX_MS	(DCF1_DATA_0_MS + DCF1_DATA_0_ERR_MS)
+#define DCF1_DATA_0_MIN_MS	(DCF1_DATA_0_MS - DCF1_DATA_0_ERR_MS)
+
+#define DCF1_DATA_1_ERR_MS	DCF1_DATA_ERR_MS
+#define DCF1_DATA_1_MAX_MS	(DCF1_DATA_1_MS + DCF1_DATA_1_ERR_MS)
+#define DCF1_DATA_1_MIN_MS	(DCF1_DATA_1_MS - DCF1_DATA_1_ERR_MS)
+
+#define DCF1_IS_DATA_0(dt)	(dt > DCF1_DATA_0_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
+#define DCF1_IS_DATA_1(dt)	(dt > DCF1_DATA_1_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
+
 /* Measure time between DATA pin level transitions */
 //#define DEBUG_DCF1_PROC_STATE1
 
@@ -146,9 +163,9 @@ static int dcf1_procirq(int argc, char *argv[])
 			dcf1dbg_s2("dcf1 RX ");
 
 			/* Decide if the delta is a binary 1, 0 or error */
-			if (delta_msec > 75 && delta_msec < 125)
+			if (DCF1_IS_DATA_0(delta_msec))
 				dcf1dbg_s2("0 (dt %d)", delta_msec);
-			else if (delta_msec >= 175 && delta_msec < 230)
+			else if (DCF1_IS_DATA_1(delta_msec))
 				dcf1dbg_s2("1 (dt %d)", delta_msec);
 			else
 				dcf1dbg_s2("err d %ld = (%ld - %ld) / %ld",
