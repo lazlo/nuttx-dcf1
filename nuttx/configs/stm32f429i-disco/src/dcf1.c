@@ -54,8 +54,8 @@ static struct dcf1_dev {
 	bool	data;
 	bool	data_last;
 
-	struct timespec	t1; /* Time of current low->high transition of data pin */
-	struct timespec t2; /* Time of last low->high transition of data pin */
+	struct timespec	t1; /* Time of low to high transition of data pin */
+	struct timespec t2; /* Time of high to low transition of data pin */
 } dev;
 
 /***********************************************************************/
