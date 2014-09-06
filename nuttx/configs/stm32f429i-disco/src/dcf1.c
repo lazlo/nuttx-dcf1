@@ -92,10 +92,11 @@ static void dcf1_init(void)
 	/* Register handler for ext. interrupt on DCF1_DATA */
 	stm32_gpiosetevent(GPIO_DCF1_DATA, true, true, false, dcf1_interrupt);
 
+	/* Fork a process to wait for interrupts to process */
+	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
+
 	/* Enable by pulling PON pin low */
 	stm32_gpiowrite(GPIO_DCF1_PON, false);
-
-	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
 }
 
 static int dcf1_open(file_t *filep)
