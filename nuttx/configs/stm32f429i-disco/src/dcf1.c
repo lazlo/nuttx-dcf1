@@ -150,6 +150,15 @@ static void dcf1_getreftime(struct timespec *t)
 	clock_gettime(DCF1_REFCLOCK, t);
 }
 
+static void dcf1_rxbuf_append(const bool bit)
+{
+	/* Make space for one bit in the receive buffer */
+	dev.rxbuf <<= 1;
+
+	if (bit)
+		dev.rxbuf |= 1;
+}
+
 /* Measure the time difference between a low-to-high and the next
  * high-to-low transisition on the DATA pin in miliseconds. */
 static long dcf1_measure(void)
@@ -223,15 +232,6 @@ static char dcf1_decode(const long delta_msec)
 	}
 	dcf1dbg_de("\n");
 	return bit;
-}
-
-static void dcf1_rxbuf_append(const bool bit)
-{
-	/* Make space for one bit in the receive buffer */
-	dev.rxbuf <<= 1;
-
-	if (bit)
-		dev.rxbuf |= 1;
 }
 
 /* Handles interrupt */
