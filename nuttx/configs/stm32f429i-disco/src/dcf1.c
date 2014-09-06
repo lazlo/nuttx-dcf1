@@ -122,8 +122,8 @@ static struct dcf1_dev {
 	bool	data;
 	bool	data_last;
 
-	struct timespec	t1; /* Time of low to high transition of data pin */
-	struct timespec t2; /* Time of high to low transition of data pin */
+	struct timespec	t_start; /* Time of low to high transition of data pin */
+	struct timespec t_end; /* Time of high to low transition of data pin */
 
 	uint64_t rxbuf;
 } dev;
@@ -163,22 +163,22 @@ static long dcf1_measure(void)
 
 	if (dev.data_last == 0 && dev.data == 1)
 	{
-		dcf1dbg_me(" t1");
+		dcf1dbg_me(" t_sta");
 
 		/* Save the current time as t1 or t_START */
-		dcf1_getreftime(&dev.t1);
-		dcf1dbg_me("=%ld", dev.t1.tv_nsec / 1000000);
+		dcf1_getreftime(&dev.t_start);
+		dcf1dbg_me("=%ld", dev.t_start.tv_nsec / 1000000);
 	}
 	else if (dev.data_last == 1 && dev.data == 0)
 	{
-		dcf1dbg_me(" t2");
+		dcf1dbg_me(" t_end");
 
 		/* Save the current time as t2 or t_END */
-		dcf1_getreftime(&dev.t2);
-		dcf1dbg_me("=%ld", dev.t2.tv_sec / 1000000);
+		dcf1_getreftime(&dev.t_end);
+		dcf1dbg_me("=%ld", dev.t_end.tv_sec / 1000000);
 
 		/* Subtract t2 - t1 and display result */
-		delta_msec = (dev.t2.tv_nsec - dev.t1.tv_nsec) / 1000000;
+		delta_msec = (dev.t_end.tv_nsec - dev.t_start.tv_nsec) / 1000000;
 
 		dcf1dbg_me(" dt %ld", delta_msec);
 	}
@@ -215,8 +215,8 @@ static char dcf1_decode(const long delta_msec)
 		bit = -1;
 		dcf1dbg_de("er dt %ld = %ld - %ld",
 				delta_msec,
-				dev.t2.tv_nsec / 1000000,
-				dev.t1.tv_nsec / 1000000);
+				dev.t_start.tv_nsec / 1000000,
+				dev.t_end.tv_nsec / 1000000);
 	}
 	dcf1dbg_de("\n");
 	return bit;
