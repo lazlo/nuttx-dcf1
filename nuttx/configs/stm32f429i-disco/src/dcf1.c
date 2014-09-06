@@ -294,6 +294,9 @@ static ssize_t dcf1_read(file_t *filep, FAR char *buf, size_t buflen)
 	if (buf == NULL || buflen < 1)
 		return -EINVAL;
 
+	/* TODO Check if there is a DCF77 message we can read */
+	/* TODO Read a complete receieved DCF77 message */
+
 	*buf = stm32_gpioread(GPIO_DCF1_DATA);
 
 	return OK;
@@ -304,6 +307,9 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 	dcf1dbg("dcf1_write\n");
 	if (buf == NULL || buflen < 1)
 		return -EINVAL;
+
+	/* TODO Write might be used to turn the receiver on or off
+	 * using the PON pin. */
 
 	return OK;
 }
