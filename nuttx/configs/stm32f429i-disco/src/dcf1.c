@@ -99,6 +99,7 @@ typedef FAR struct file file_t;
 static bool	dcf1_read_data_pin(void);
 static void	dcf1_write_led_pin(const bool out);
 static void	dcf1_getreftime(struct timespec *t);
+static void	dcf1_rxbuf_append(const bool bit);
 
 static void	dcf1_enable(const bool onoff);
 static void	dcf1_init(void);
@@ -224,6 +225,15 @@ static char dcf1_decode(const long delta_msec)
 	return bit;
 }
 
+static void dcf1_rxbuf_append(const bool bit)
+{
+	/* Make space for one bit in the receive buffer */
+	dev.rxbuf <<= 1;
+
+	if (bit)
+		dev.rxbuf |= 1;
+}
+
 /* Handles interrupt */
 static int dcf1_interrupt(int irq, void *context)
 {
@@ -259,11 +269,7 @@ static int dcf1_procirq(int argc, char *argv[])
 			/* Only modify receive buffer on successful decoding */
 			if (bit != -1)
 			{
-				/* Make space for one bit in the receive buffer */
-				dev.rxbuf <<= 1;
-
-				if (bit)
-					dev.rxbuf |= 1;
+				dcf1_rxbuf_append(bit);
 			}
 
 			delta_msec = 0;
