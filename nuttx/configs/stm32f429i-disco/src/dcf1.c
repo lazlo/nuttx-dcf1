@@ -106,6 +106,8 @@ static struct dcf1_dev {
 /* Private Functions                                                   */
 /***********************************************************************/
 
+/* Measure the time difference between a low-to-high and the next
+ * high-to-low transisition on the DATA pin in miliseconds. */
 static long dcf1_measure(void)
 {
 	long delta_msec = 0;
@@ -149,6 +151,7 @@ static long dcf1_measure(void)
 	return delta_msec;
 }
 
+/* Decode the time delta measured into a bit. Return -1 on error. */
 static char dcf1_decode(const long delta_msec)
 {
 	char bit;
