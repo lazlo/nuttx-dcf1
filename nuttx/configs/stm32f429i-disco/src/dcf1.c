@@ -46,6 +46,9 @@ static const struct file_operations dcf1_ops = {
 static struct dcf1_dev {
 	bool	led_state;
 	sem_t	isr_sem;
+
+	bool	data;
+	bool	data_last;
 } dev;
 
 /***********************************************************************/
@@ -65,13 +68,35 @@ static int dcf1_procirq(int argc, char *argv[])
 	{
 		/* Wait for interrupt to occur */
 		sem_wait(&dev.isr_sem);
-		/* Read the current state of data */
-		dev.led_state = stm32_gpioread(GPIO_DCF1_DATA);
 
-		dcf1dbg("dcf1 data %d\n", dev.led_state);
+		/* Read the current state of data */
+		dev.data = stm32_gpioread(GPIO_DCF1_DATA);
+		dcf1dbg("dcf1  %d", dev.data);
 
 		/* Make the LED mirror the current data state */
+		dev.led_state = dev.data;
 		stm32_gpiowrite(GPIO_DCF1_LED, dev.led_state);
+
+		if (dev.data_last == 0 && dev.data == 1)
+		{
+			dcf1dbg(" t1");
+			/* TODO save the current time as t1 or t_START */
+		}
+		else if (dev.data_last == 1 && dev.data == 0)
+		{
+			dcf1dbg(" t2");
+			/* TODO save the current time as t2 or t_END */
+			/* TODO subtract t2 - t1 and display result */
+		}
+		else
+		{
+			/* Should not happen! */
+			dcf1dbg(" err");
+		}
+		dcf1dbg("\n");
+
+		/* Prepare for new loop iteration */
+		dev.data_last = dev.data;
 	}
 	return OK;
 }
