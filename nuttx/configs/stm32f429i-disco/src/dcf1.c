@@ -147,26 +147,32 @@ static long dcf1_measure(void)
 	return delta_msec;
 }
 
-static void dcf1_decode(const long delta_msec)
+static char dcf1_decode(const long delta_msec)
 {
+	char bit;
+
 	dcf1dbg_de("dcf1 RX ");
 
 	/* Decide if the delta is a binary 1, 0 or error */
 	if (DCF1_IS_DATA_0(delta_msec))
 	{
+		bit = 0;
 		dcf1dbg_de("0 (dt %d)", delta_msec);
 	}
 	else if (DCF1_IS_DATA_1(delta_msec))
 	{
+		bit = 1;
 		dcf1dbg_de("1 (dt %d)", delta_msec);
 	}
 	else
 	{
+		bit = -1;
 		dcf1dbg_de("er dt %ld = (%ld - %ld) / %ld",
 				delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
 				1000000);
 	}
 	dcf1dbg_de("\n");
+	return bit;
 }
 
 /* Handles interrupt */
@@ -180,6 +186,7 @@ static int dcf1_interrupt(int irq, void *context)
 static int dcf1_procirq(int argc, char *argv[])
 {
 	long delta_msec = 0;
+	char bit;
 
 	while (1)
 	{
@@ -198,7 +205,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 		if (delta_msec)
 		{
-			dcf1_decode(delta_msec);
+			bit = dcf1_decode(delta_msec);
 
 			delta_msec = 0;
 		}
