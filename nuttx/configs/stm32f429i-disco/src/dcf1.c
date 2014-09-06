@@ -29,7 +29,7 @@
 //#define DEBUG_DCF1_PROC_STATE1
 
 /* Calculate bits from time delta */
-//#define DEBUG_DCF1_PROC_STATE2
+#define DEBUG_DCF1_PROC_STATE2
 
 #define dcf1dbg	printf
 
@@ -79,16 +79,30 @@ static int dcf1_interrupt(int irq, void *context)
 /* Process data */
 static int dcf1_procirq(int argc, char *argv[])
 {
-	long delta_nsec;
+#ifdef DEBUG_DCF1_PROC_STAGE1
+# 	define dcf1dbg_s1	dcf1dbg
+#else
+#	define dcf1dbg_s1(x...)
+#endif
+#ifdef DEBUG_DCF1_PROC_STATE2
+#	define dcf1dbg_s2	dcf1dbg
+#else
+#	define dcf1dbg_s2(x...)
+#endif
+	long delta_msec = 0;
 
 	while (1)
 	{
 		/* Wait for interrupt to occur */
 		sem_wait(&dev.isr_sem);
 
+		/*
+		 * Measure low/high phase duration
+		 */
+
 		/* Read the current state of data */
 		dev.data = stm32_gpioread(GPIO_DCF1_DATA);
-		dcf1dbg("dcf1  %d", dev.data);
+		dcf1dbg_s1("dcf1  %d", dev.data);
 
 		/* Make the LED mirror the current data state */
 		dev.led_state = dev.data;
@@ -96,29 +110,53 @@ static int dcf1_procirq(int argc, char *argv[])
 
 		if (dev.data_last == 0 && dev.data == 1)
 		{
-			dcf1dbg(" t1");
+			dcf1dbg_s1(" t1");
 
 			/* Save the current time as t1 or t_START */
 			clock_gettime(DCF1_REFCLOCK, &dev.t1);
+			dcf1dbg_s1("=%ld", dev.t1.tv_nsec / 1000000);
 		}
 		else if (dev.data_last == 1 && dev.data == 0)
 		{
-			dcf1dbg(" t2");
+			dcf1dbg_s1(" t2");
 
 			/* Save the current time as t2 or t_END */
 			clock_gettime(DCF1_REFCLOCK, &dev.t2);
+			dcf1dbg_s1("=%ld", dev.t2.tv_sec / 1000000);
 
 			/* Subtract t2 - t1 and display result */
-			delta_nsec = dev.t2.tv_nsec - dev.t1.tv_nsec;
+			delta_msec = (dev.t2.tv_nsec - dev.t1.tv_nsec) / 1000000;
 
-			dcf1dbg(" d %lu", delta_nsec / 1000000);
+			dcf1dbg_s1(" d %ld", delta_msec);
 		}
 		else
 		{
 			/* Should not happen! */
-			dcf1dbg(" err");
+			dcf1dbg_s1(" err");
 		}
-		dcf1dbg("\n");
+		dcf1dbg_s1("\n");
+
+		/*
+		 * Decode duration into bits
+		 */
+
+		if (delta_msec)
+		{
+			dcf1dbg_s2("dcf1 RX ");
+
+			/* Decide if the delta is a binary 1, 0 or error */
+			if (delta_msec > 75 && delta_msec < 125)
+				dcf1dbg_s2("0");
+			else if (delta_msec >= 175 && delta_msec < 230)
+				dcf1dbg_s2("1");
+			else
+				dcf1dbg_s2("err d %ld = (%ld - %ld) / %ld",
+					delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
+					1000000);
+			dcf1dbg_s2("\n");
+
+			delta_msec = 0;
+		}
 
 		/* Prepare for new loop iteration */
 		dev.data_last = dev.data;
