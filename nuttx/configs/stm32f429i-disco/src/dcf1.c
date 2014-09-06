@@ -167,7 +167,7 @@ static long dcf1_measure(void)
 
 		/* Save the current time as t1 or t_START */
 		dcf1_getreftime(&dev.t_start);
-		dcf1dbg_me(" = %ld", dev.t_start.tv_nsec / 1000000);
+		dcf1dbg_me(" = %ld ms", dev.t_start.tv_nsec / 1000000);
 	}
 	else if (dev.data_last == 1 && dev.data == 0)
 	{
@@ -175,12 +175,12 @@ static long dcf1_measure(void)
 
 		/* Save the current time as t2 or t_END */
 		dcf1_getreftime(&dev.t_end);
-		dcf1dbg_me(" = %ld", dev.t_end.tv_nsec / 1000000);
+		dcf1dbg_me(" = %ld ms", dev.t_end.tv_nsec / 1000000);
 
 		/* Subtract t2 - t1 and display result */
 		delta_msec = (dev.t_end.tv_nsec - dev.t_start.tv_nsec) / 1000000;
 
-		dcf1dbg_me(" (dt %ld)", delta_msec);
+		dcf1dbg_me(" (dt %ld ms)", delta_msec);
 	}
 	else
 	{
@@ -203,17 +203,17 @@ static char dcf1_decode(const long delta_msec)
 	if (DCF1_IS_DATA_0(delta_msec))
 	{
 		bit = 0;
-		dcf1dbg_de("0 (dt %ld)", delta_msec);
+		dcf1dbg_de("0 (dt %ld ms)", delta_msec);
 	}
 	else if (DCF1_IS_DATA_1(delta_msec))
 	{
 		bit = 1;
-		dcf1dbg_de("1 (dt %ld)", delta_msec);
+		dcf1dbg_de("1 (dt %ld ms)", delta_msec);
 	}
 	else
 	{
 		bit = -1;
-		dcf1dbg_de("er dt %ld = %ld - %ld",
+		dcf1dbg_de("er dt %ld ms = %ld - %ld",
 				delta_msec,
 				dev.t_start.tv_nsec / 1000000,
 				dev.t_end.tv_nsec / 1000000);
