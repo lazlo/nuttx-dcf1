@@ -1,8 +1,9 @@
-/* Driver for the DCF1 */
+/* Driver for the DCF1 by D. Laszlo Sitzer <dlsitzer@gmail.com> */
 
 /* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
 
 /***********************************************************************/
+/* Includes                                                            */
 /***********************************************************************/
 
 #include <nuttx/config.h>
@@ -17,6 +18,7 @@
 #include <stm32.h>
 
 /***********************************************************************/
+/* Configuration                                                       */
 /***********************************************************************/
 
 #define GPIO_DCF1_LED	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN2)
@@ -38,6 +40,7 @@
 #define DEBUG_DCF1_DECODE
 
 /***********************************************************************/
+/* Helpers                                                             */
 /***********************************************************************/
 
 #define DCF1_DATA_0_ERR_MS	DCF1_DATA_ERR_MS
@@ -98,6 +101,7 @@ static struct dcf1_dev {
 } dev;
 
 /***********************************************************************/
+/* Private Functions                                                   */
 /***********************************************************************/
 
 static long dcf1_measure(void)
@@ -283,6 +287,7 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 }
 
 /***********************************************************************/
+/* Public Functions                                                    */
 /***********************************************************************/
 
 void up_dcf1(void)
