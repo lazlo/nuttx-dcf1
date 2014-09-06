@@ -229,6 +229,16 @@ static void dcf1_init(void)
 
 	/* Enable the receiver module */
 	dcf1_enable(true);
+
+
+	/* Display min/max values for decoding (only for development) */
+	dcf1dbg("dcf1 0 = %d ms (max: %d min: %d) 1 = %d ms (max: %d min: %d)\n",
+		DCF1_DATA_0_MS,
+		DCF1_DATA_0_MAX_MS,
+		DCF1_DATA_0_MIN_MS,
+		DCF1_DATA_1_MS,
+		DCF1_DATA_1_MAX_MS,
+		DCF1_DATA_1_MIN_MS);
 }
 
 static int dcf1_open(file_t *filep)
