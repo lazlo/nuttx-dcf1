@@ -203,12 +203,12 @@ static char dcf1_decode(const long delta_msec)
 	if (DCF1_IS_DATA_0(delta_msec))
 	{
 		bit = 0;
-		dcf1dbg_de("0 (dt %d)", delta_msec);
+		dcf1dbg_de("0 (dt %ld)", delta_msec);
 	}
 	else if (DCF1_IS_DATA_1(delta_msec))
 	{
 		bit = 1;
-		dcf1dbg_de("1 (dt %d)", delta_msec);
+		dcf1dbg_de("1 (dt %ld)", delta_msec);
 	}
 	else
 	{
