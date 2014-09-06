@@ -82,6 +82,7 @@ static void dcf1_enable(const bool onoff)
 	/* Enable by pulling PON pin low */
 	/* Disable receiver module by pulling pin high */
 	stm32_gpiowrite(GPIO_DCF1_PON, !onoff);
+	stm32_gpiowrite(GPIO_DCF1_LED, onoff);
 }
 
 static void dcf1_init(void)
@@ -97,9 +98,8 @@ static void dcf1_init(void)
 	stm32_configgpio(GPIO_DCF1_PON);
 	stm32_configgpio(GPIO_DCF1_DATA);
 
-	/* Set default output levels */
-	stm32_gpiowrite(GPIO_DCF1_LED, true);
-	stm32_gpiowrite(GPIO_DCF1_PON, true);
+	/* Set default output levels (receiver and LED off by default) */
+	dcf1_enable(false);
 
 	/* Register handler for ext. interrupt on DCF1_DATA */
 	stm32_gpiosetevent(GPIO_DCF1_DATA, true, true, false, dcf1_interrupt);
