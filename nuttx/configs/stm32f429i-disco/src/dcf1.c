@@ -96,6 +96,10 @@
 
 typedef FAR struct file file_t;
 
+static bool	dcf1_read_data_pin(void);
+static void	dcf1_write_led_pin(const bool out);
+static void	dcf1_getreftime(struct timespec *t);
+
 static void	dcf1_enable(const bool onoff);
 static void	dcf1_init(void);
 
@@ -130,6 +134,21 @@ static struct dcf1_dev {
 /* Private Functions                                                   */
 /***********************************************************************/
 
+static bool dcf1_read_data_pin(void)
+{
+	return stm32_gpioread(GPIO_DCF1_DATA);
+}
+
+static void dcf1_write_led_pin(const bool out)
+{
+	stm32_gpiowrite(GPIO_DCF1_LED, out);
+}
+
+static void dcf1_getreftime(struct timespec *t)
+{
+	clock_gettime(DCF1_REFCLOCK, t);
+}
+
 /* Measure the time difference between a low-to-high and the next
  * high-to-low transisition on the DATA pin in miliseconds. */
 static long dcf1_measure(void)
@@ -137,19 +156,19 @@ static long dcf1_measure(void)
 	long delta_msec = 0;
 
 	/* Read the current state of data */
-	dev.data = stm32_gpioread(GPIO_DCF1_DATA);
+	dev.data = dcf1_read_data_pin();
 	dcf1dbg_me("dcf1  %d", dev.data);
 
 	/* Make the LED mirror the current data state */
 	dev.led_state = dev.data;
-	stm32_gpiowrite(GPIO_DCF1_LED, dev.led_state);
+	dcf1_write_led_pin(dev.led_state);
 
 	if (dev.data_last == 0 && dev.data == 1)
 	{
 		dcf1dbg_me(" t1");
 
 		/* Save the current time as t1 or t_START */
-		clock_gettime(DCF1_REFCLOCK, &dev.t1);
+		dcf1_getreftime(&dev.t1);
 		dcf1dbg_me("=%ld", dev.t1.tv_nsec / 1000000);
 	}
 	else if (dev.data_last == 1 && dev.data == 0)
@@ -157,7 +176,7 @@ static long dcf1_measure(void)
 		dcf1dbg_me(" t2");
 
 		/* Save the current time as t2 or t_END */
-		clock_gettime(DCF1_REFCLOCK, &dev.t2);
+		dcf1_getreftime(&dev.t1);
 		dcf1dbg_me("=%ld", dev.t2.tv_sec / 1000000);
 
 		/* Subtract t2 - t1 and display result */
