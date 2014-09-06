@@ -43,22 +43,22 @@
 #define DCF1_IS_DATA_1(dt)	(dt > DCF1_DATA_1_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
 
 /* Measure time between DATA pin level transitions */
-//#define DEBUG_DCF1_PROC_STATE1
+//#define DEBUG_DCF1_MEASURE
 
 /* Calculate bits from time delta */
-#define DEBUG_DCF1_PROC_STATE2
+#define DEBUG_DCF1_DECODE
 
 #define dcf1dbg	printf
 
-#ifdef DEBUG_DCF1_PROC_STAGE1
-# 	define dcf1dbg_s1	dcf1dbg
+#ifdef DEBUG_DCF1_MEASURE
+# 	define dcf1dbg_me	dcf1dbg
 #else
-#	define dcf1dbg_s1(x...)
+#	define dcf1dbg_me(x...)
 #endif
-#ifdef DEBUG_DCF1_PROC_STATE2
-#	define dcf1dbg_s2	dcf1dbg
+#ifdef DEBUG_DCF1_DECODE
+#	define dcf1dbg_de	dcf1dbg
 #else
-#	define dcf1dbg_s2(x...)
+#	define dcf1dbg_de(x...)
 #endif
 
 /***********************************************************************/
@@ -99,18 +99,18 @@ static struct dcf1_dev {
 
 static void dcf1_decode(const long delta_msec)
 {
-	dcf1dbg_s2("dcf1 RX ");
+	dcf1dbg_de("dcf1 RX ");
 
 	/* Decide if the delta is a binary 1, 0 or error */
 	if (DCF1_IS_DATA_0(delta_msec))
-		dcf1dbg_s2("0 (dt %d)", delta_msec);
+		dcf1dbg_de("0 (dt %d)", delta_msec);
 	else if (DCF1_IS_DATA_1(delta_msec))
-		dcf1dbg_s2("1 (dt %d)", delta_msec);
+		dcf1dbg_de("1 (dt %d)", delta_msec);
 	else
-		dcf1dbg_s2("err d %ld = (%ld - %ld) / %ld",
+		dcf1dbg_de("err d %ld = (%ld - %ld) / %ld",
 				delta_msec, dev.t2.tv_nsec, dev.t1.tv_nsec,
 				1000000);
-	dcf1dbg_s2("\n");
+	dcf1dbg_de("\n");
 }
 
 /* Handles interrupt */
@@ -136,7 +136,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 		/* Read the current state of data */
 		dev.data = stm32_gpioread(GPIO_DCF1_DATA);
-		dcf1dbg_s1("dcf1  %d", dev.data);
+		dcf1dbg_me("dcf1  %d", dev.data);
 
 		/* Make the LED mirror the current data state */
 		dev.led_state = dev.data;
@@ -144,31 +144,31 @@ static int dcf1_procirq(int argc, char *argv[])
 
 		if (dev.data_last == 0 && dev.data == 1)
 		{
-			dcf1dbg_s1(" t1");
+			dcf1dbg_me(" t1");
 
 			/* Save the current time as t1 or t_START */
 			clock_gettime(DCF1_REFCLOCK, &dev.t1);
-			dcf1dbg_s1("=%ld", dev.t1.tv_nsec / 1000000);
+			dcf1dbg_me("=%ld", dev.t1.tv_nsec / 1000000);
 		}
 		else if (dev.data_last == 1 && dev.data == 0)
 		{
-			dcf1dbg_s1(" t2");
+			dcf1dbg_me(" t2");
 
 			/* Save the current time as t2 or t_END */
 			clock_gettime(DCF1_REFCLOCK, &dev.t2);
-			dcf1dbg_s1("=%ld", dev.t2.tv_sec / 1000000);
+			dcf1dbg_me("=%ld", dev.t2.tv_sec / 1000000);
 
 			/* Subtract t2 - t1 and display result */
 			delta_msec = (dev.t2.tv_nsec - dev.t1.tv_nsec) / 1000000;
 
-			dcf1dbg_s1(" d %ld", delta_msec);
+			dcf1dbg_me(" d %ld", delta_msec);
 		}
 		else
 		{
 			/* Should not happen! */
-			dcf1dbg_s1(" err");
+			dcf1dbg_me(" err");
 		}
-		dcf1dbg_s1("\n");
+		dcf1dbg_me("\n");
 
 		/*
 		 * Decode duration into bits
