@@ -63,10 +63,14 @@ static int dcf1_procirq(int argc, char *argv[])
 {
 	while (1)
 	{
+		/* Wait for interrupt to occur */
 		sem_wait(&dev.isr_sem);
-#if 0
-		dcf1dbg("dcf1 IRQ %d\n", stm32_gpioread(GPIO_DCF1_DATA));
-#endif
+		/* Read the current state of data */
+		dev.led_state = stm32_gpioread(GPIO_DCF1_DATA);
+
+		dcf1dbg("dcf1 data %d\n", dev.led_state);
+
+		/* Make the LED mirror the current data state */
 		stm32_gpiowrite(GPIO_DCF1_LED, dev.led_state);
 	}
 	return OK;
