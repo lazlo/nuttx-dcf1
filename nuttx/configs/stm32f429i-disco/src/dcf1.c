@@ -31,6 +31,15 @@
 #define DCF1_DATA_1_MS		200
 #define DCF1_DATA_ERR_MS	30
 
+/* Measure time between DATA pin level transitions */
+//#define DEBUG_DCF1_MEASURE
+
+/* Calculate bits from time delta */
+#define DEBUG_DCF1_DECODE
+
+/***********************************************************************/
+/***********************************************************************/
+
 #define DCF1_DATA_0_ERR_MS	DCF1_DATA_ERR_MS
 #define DCF1_DATA_0_MAX_MS	(DCF1_DATA_0_MS + DCF1_DATA_0_ERR_MS)
 #define DCF1_DATA_0_MIN_MS	(DCF1_DATA_0_MS - DCF1_DATA_0_ERR_MS)
@@ -41,12 +50,6 @@
 
 #define DCF1_IS_DATA_0(dt)	(dt > DCF1_DATA_0_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt > DCF1_DATA_1_MIN_MS && dt < DCF1_DATA_1_MAX_MS)
-
-/* Measure time between DATA pin level transitions */
-//#define DEBUG_DCF1_MEASURE
-
-/* Calculate bits from time delta */
-#define DEBUG_DCF1_DECODE
 
 #define dcf1dbg	printf
 
