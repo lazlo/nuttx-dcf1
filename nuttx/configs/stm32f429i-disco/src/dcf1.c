@@ -194,7 +194,7 @@ static void dcf1_timespec_sub(struct timespec *min, struct timespec *sub,
 {
 	if (min->tv_nsec < sub->tv_nsec)
 	{
-		dcf1dbg(" -X- ");
+//		dcf1dbg(" -X- "); /* subtract with carry */
 		min->tv_nsec += 1000000000;
 		min->tv_sec  -= 1;
 	}
