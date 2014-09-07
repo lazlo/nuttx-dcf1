@@ -415,7 +415,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 				/* Now that we have decoded a valid bit, we shall calculate
 				 * the delta between this and the last valid bit received. */
-				dcf1_timespec_sub(&ti, &ti_last, &tid);
+				dcf1_timespec_sub(&ti_last, &ti, &tid);
 
 				if (tid.tv_sec == 2)
 					dcf1dbg("dcf1 SY found start\n");
