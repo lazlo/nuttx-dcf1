@@ -283,6 +283,7 @@ static char dcf1_decode(const long delta_msec)
 	else
 	{
 		bit = -1;
+		/* TODO Use dcf1_timespec_sub() */
 		dcf1dbg_de("er  (dt %3ld ms) = %ld-%ld",
 				delta_msec,
 				dev.t_end.tv_nsec / 1000000,
