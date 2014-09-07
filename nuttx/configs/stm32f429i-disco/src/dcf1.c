@@ -237,6 +237,9 @@ static long dcf1_measure(void)
 #	define LOW2HIGH(d)	(d.data_in_state_last == 0 && d.data_in_state == 1)
 #	define HIGH2LOW(d)	(d.data_in_state_last == 1 && d.data_in_state == 0)
 #	define putts(ts)	dcf1dbg_me("%d.%09ld s", ts.tv_sec, ts.tv_nsec)
+#	define save_t_start()	dcf1_getreftime(&dev.t_start)
+#	define save_t_end()	dcf1_getreftime(&dev.t_end)
+#	define calc_dt()	dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dev.dt)
 
 	/* Read the current state of data */
 	dev.data_in_state = dcf1_read_data_pin();
@@ -248,22 +251,22 @@ static long dcf1_measure(void)
 
 	if (LOW2HIGH(dev))
 	{
-		dcf1dbg_me(" t_sta = ");
-
 		/* Save the current time as t1 or t_START */
-		dcf1_getreftime(&dev.t_start);
+		save_t_start();
+
+		dcf1dbg_me(" t_sta = ");
 		putts(dev.t_start);
 	}
 	else if (HIGH2LOW(dev))
 	{
-		dcf1dbg_me(" t_end = ");
-
 		/* Save the current time as t2 or t_END */
-		dcf1_getreftime(&dev.t_end);
+		save_t_end();
+
+		dcf1dbg_me(" t_end = ");
 		putts(dev.t_end);
 
 		/* Subtract t2 - t1 and display result */
-		dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dev.dt);
+		calc_dt();
 
 		dcf1dbg_me(" (dt ");
 		putts(dev.dt);
