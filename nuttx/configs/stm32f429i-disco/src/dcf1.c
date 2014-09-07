@@ -107,6 +107,7 @@ static void	dcf1_getreftime(struct timespec *t);
 
 /* Receive Buffer Management */
 
+static void	dcf1_rxbuf_show(void);
 static void	dcf1_rxbuf_append(const bool bit);
 
 /* Initialization */
@@ -173,6 +174,17 @@ static void dcf1_enable(const bool onoff)
 static void dcf1_getreftime(struct timespec *t)
 {
 	clock_gettime(DCF1_REFCLOCK, t);
+}
+
+static void dcf1_rxbuf_show(void)
+{
+	int i;
+	dcf1dbg("dcf1 rxbuf ");
+	for (i = 0; i < 60; i++)
+	{
+		dcf1dbg("%d", (dev.rxbuf & (1 << i)) ? 1 : 0);
+	}
+	dcf1dbg("\n");
 }
 
 static void dcf1_rxbuf_append(const bool bit)
