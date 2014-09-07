@@ -211,8 +211,9 @@ static void dcf1_rxbuf_append(const bool bit)
  * high-to-low transisition on the DATA pin in miliseconds. */
 static long dcf1_measure(void)
 {
-#define LOW2HIGH(d)	(d.data_last == 0 && d.data == 1)
-#define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
+#	define LOW2HIGH(d)	(d.data_last == 0 && d.data == 1)
+#	define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
+#	define putms(ld)	dcf1dbg_me("%3ld ms", ld / 1000000)
 
 	long delta_msec = 0;
 
@@ -226,24 +227,26 @@ static long dcf1_measure(void)
 
 	if (LOW2HIGH(dev))
 	{
-		dcf1dbg_me(" t_sta");
+		dcf1dbg_me(" t_sta = ");
 
 		/* Save the current time as t1 or t_START */
 		dcf1_getreftime(&dev.t_start);
-		dcf1dbg_me(" = %3ld ms", dev.t_start.tv_nsec / 1000000);
+		putms(dev.t_start.tv_nsec);
 	}
 	else if (HIGH2LOW(dev))
 	{
-		dcf1dbg_me(" t_end");
+		dcf1dbg_me(" t_end = ");
 
 		/* Save the current time as t2 or t_END */
 		dcf1_getreftime(&dev.t_end);
-		dcf1dbg_me(" = %3ld ms", dev.t_end.tv_nsec / 1000000);
+		putms(dev.t_end.tv_nsec);
 
 		/* Subtract t2 - t1 and display result */
 		delta_msec = (dev.t_end.tv_nsec - dev.t_start.tv_nsec) / 1000000;
 
-		dcf1dbg_me(" (dt %3ld ms)", delta_msec);
+		dcf1dbg_me(" (dt ");
+		putms((dev.t_end.tv_nsec - dev.t_start.tv_nsec));
+		dcf1dbg_me(")");
 	}
 	else
 	{
