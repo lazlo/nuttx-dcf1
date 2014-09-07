@@ -213,6 +213,9 @@ static void dcf1_rxbuf_append(const bool bit)
  * high-to-low transisition on the DATA pin in miliseconds. */
 static long dcf1_measure(void)
 {
+#define LOW2HIGH(d)	(d.data_last == 0 && d.data == 1)
+#define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
+
 	long delta_msec = 0;
 
 	/* Read the current state of data */
@@ -223,7 +226,7 @@ static long dcf1_measure(void)
 	dev.led_state = dev.data;
 	dcf1_write_led_pin(dev.led_state);
 
-	if (dev.data_last == 0 && dev.data == 1)
+	if (LOW2HIGH(dev))
 	{
 		dcf1dbg_me(" t_sta");
 
@@ -231,7 +234,7 @@ static long dcf1_measure(void)
 		dcf1_getreftime(&dev.t_start);
 		dcf1dbg_me(" = %3ld ms", dev.t_start.tv_nsec / 1000000);
 	}
-	else if (dev.data_last == 1 && dev.data == 0)
+	else if (HIGH2LOW(dev))
 	{
 		dcf1dbg_me(" t_end");
 
