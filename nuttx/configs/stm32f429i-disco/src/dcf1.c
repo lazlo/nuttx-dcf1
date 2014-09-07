@@ -20,6 +20,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 
 #include <time.h>
 #include <string.h>
