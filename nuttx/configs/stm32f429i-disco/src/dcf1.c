@@ -428,9 +428,11 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * 	 - 1000 ms idle time from bit 59 which has no modulation (active time)
 				 */
 				if (tid.tv_sec == 2)
-					dcf1dbg("dcf1 SY found start\n");
+					dcf1dbg("dcf1 SY found start ");
 				else
-					dcf1dbg("dcf1 SY %d.%ld s\n", tid.tv_sec, tid.tv_nsec);
+					dcf1dbg("dcf1 SY ?  ");
+
+				dcf1dbg(" (dt %ld.%ld s)\n", tid.tv_sec, tid.tv_nsec / 1000000);
 
 				/* Save current time as last for next measurement */
 				memcpy(&ti_last, &ti, sizeof(ti));
