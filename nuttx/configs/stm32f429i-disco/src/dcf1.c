@@ -201,7 +201,7 @@ static void dcf1_timespec_sub(struct timespec *min, struct timespec *sub,
 	if (min->tv_nsec < sub->tv_nsec)
 	{
 //		dcf1dbg(" -X- "); /* subtract with carry */
-		min->tv_nsec += 1000000000;
+		min->tv_nsec += NSEC_PER_SEC;
 		min->tv_sec  -= 1;
 	}
 
@@ -235,9 +235,9 @@ static void timespec_sub(struct timespec *min, struct timespec *sub, struct time
 		 *
 		 * In the final step we need to remove the full seconds from the nanoseonds.
 		 */
-		dif->tv_nsec = (min->tv_sec * 100000000) + min->tv_nsec - sub->tv_nsec;
-		dif->tv_sec = (dif->tv_nsec / 100000000) - min->tv_sec;
-		dif->tv_nsec = dif->tv_nsec % 100000000;
+		dif->tv_nsec = (min->tv_sec * NSEC_PER_SEC) + min->tv_nsec - sub->tv_nsec;
+		dif->tv_sec = (dif->tv_nsec / NSEC_PER_SEC) - min->tv_sec;
+		dif->tv_nsec = dif->tv_nsec % NSEC_PER_SEC;
 	}
 	else
 	{
@@ -320,7 +320,7 @@ static long dcf1_measure(void)
 	}
 	dcf1dbg_me("\n");
 
-	return dev.dt.tv_nsec / 1000000;
+	return dev.dt.tv_nsec / USEC_PER_SEC;
 }
 
 /* Decode the time delta measured into a bit. Return -1 on error. */
@@ -347,8 +347,8 @@ static char dcf1_decode(const long delta_msec)
 		/* TODO Use dcf1_timespec_sub() */
 		dcf1dbg_de("er  (dt %3ld ms) = %ld.%ld-%ld.%ld",
 				delta_msec,
-				dev.t_end.tv_sec, (dev.t_end.tv_nsec / 1000000),
-				dev.t_start.tv_sec, (dev.t_start.tv_nsec / 1000000));
+				dev.t_end.tv_sec, (dev.t_end.tv_nsec / USEC_PER_SEC),
+				dev.t_start.tv_sec, (dev.t_start.tv_nsec / USEC_PER_SEC));
 	}
 	dcf1dbg_de("\n");
 	return bit;
