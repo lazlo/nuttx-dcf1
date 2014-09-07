@@ -146,17 +146,17 @@ static struct dcf1_dev {
 	uint32_t	gpio_pon;
 	uint32_t	gpio_led;
 
-	bool	led_out_state;
-	sem_t	isr_sem;
+	bool		led_out_state;
+	sem_t		isr_sem;
 
-	bool	data_in_state;
-	bool	data_in_state_last;
+	bool		data_in_state;
+	bool		data_in_state_last;
 
-	struct timespec	t_start; /* Time of low to high transition of data pin */
+	struct timespec t_start; /* Time of low to high transition of data pin */
 	struct timespec t_end; /* Time of high to low transition of data pin */
 	struct timespec dt;
 
-	uint64_t rxbuf;
+	uint64_t	rxbuf;
 } dev;
 
 /***********************************************************************/
