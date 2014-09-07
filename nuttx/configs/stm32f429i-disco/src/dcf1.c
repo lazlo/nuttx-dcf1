@@ -192,6 +192,7 @@ static void dcf1_getreftime(struct timespec *t)
 	clock_gettime(DCF1_REFCLOCK, t);
 }
 
+#if 1
 /* TODO Implement subtraction for timespec structures.
  * See http://lists.gnu.org/archive/html/bug-gnulib/2011-06/msg00371.html */
 static void dcf1_timespec_sub(struct timespec *min, struct timespec *sub,
@@ -207,6 +208,44 @@ static void dcf1_timespec_sub(struct timespec *min, struct timespec *sub,
 	dif->tv_nsec = min->tv_nsec - sub->tv_nsec;
 	dif->tv_sec = min->tv_sec - sub->tv_sec;
 }
+#else
+/* Subtract one timespect from the other and save the result in a third timespec structure */
+static void timespec_sub(struct timespec *min, struct timespec *sub, struct timespec *dif)
+{
+	if (min->tv_sec <= sub->tv_sec)
+	{
+		dcf1dbg("dcf1 err tsub\n");
+		return;
+	}
+
+	/* Subtract with carry? */
+	if (min->tv_nsec < sub->tv_nsec)
+	{
+		/* When current nanosecond value is greater than from the last
+		 * measurement, we will naturally get a negative value when subtracting.
+		 *
+		 * To get the correct value we take the number of seconds, turn them into
+		 * nanoseconds, add the original nanosecond value. Now we subtract the
+		 * last nanosecond value.
+		 *
+		 * In the next step we calculate the seconds. Here we rely on the fact
+		 * the our calculation result of nanoseconds also contains the the full
+		 * seconds. These are now taken into account instead of the actual seconds
+		 * value.
+		 *
+		 * In the final step we need to remove the full seconds from the nanoseonds.
+		 */
+		dif->tv_nsec = (min->tv_sec * 100000000) + min->tv_nsec - sub->tv_nsec;
+		dif->tv_sec = (dif->tv_nsec / 100000000) - min->tv_sec;
+		dif->tv_nsec = dif->tv_nsec % 100000000;
+	}
+	else
+	{
+		dif->tv_nsec = min->tv_nsec - sub->tv_nsec;
+		dif->tv_sec = min->tv_sec - sub->tv_sec;
+	}
+}
+#endif
 
 static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
 {
@@ -338,6 +377,11 @@ static int dcf1_procirq(int argc, char *argv[])
 {
 	long delta_msec = 0;
 	char bit;
+#if 1
+	struct timespec ti_last;
+	struct timespec ti;
+	struct timespec tid;
+#endif
 
 	while (1)
 	{
@@ -366,6 +410,23 @@ static int dcf1_procirq(int argc, char *argv[])
 				/* Display contents of receive buffer (for development)
 				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
 				dcf1_rxbuf_show(60, 20);
+
+#if 1
+				/* Save time to calculate delta between two received bits */
+				dcf1_getreftime(&ti);
+
+				/* Now that we have decoded a valid bit, we shall calculate
+				 * the delta between this and the last valid bit received. */
+				dcf1_timespec_sub(&ti, &ti_last, &tid);
+
+				if (tid.tv_sec == 2)
+					dcf1dbg("dcf1 SY found start\n");
+				else
+					dcf1dbg("dcf1 SY %d.%ld s\n", tid.tv_sec, tid.tv_nsec);
+
+				/* Save current time as last for next measurement */
+				memcpy(&ti_last, &ti, sizeof(ti));
+#endif
 			}
 
 			delta_msec = 0;
