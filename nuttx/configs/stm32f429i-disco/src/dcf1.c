@@ -184,6 +184,22 @@ static void dcf1_getreftime(struct timespec *t)
 	clock_gettime(DCF1_REFCLOCK, t);
 }
 
+/* TODO Implement subtraction for timespec structures.
+ * See http://lists.gnu.org/archive/html/bug-gnulib/2011-06/msg00371.html */
+static void dcf1_timespec_sub(struct timespec *min, struct timespec *sub,
+				struct timespec *dif)
+{
+	if (min->tv_nsec < sub->tv_nsec)
+	{
+		dcf1dbg(" -X- ");
+		min->tv_nsec += 1000000000;
+		min->tv_sec  -= 1;
+	}
+
+	dif->tv_nsec = min->tv_nsec - sub->tv_nsec;
+	dif->tv_sec = min->tv_sec - sub->tv_sec;
+}
+
 static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
 {
 	unsigned short i;
@@ -216,7 +232,7 @@ static long dcf1_measure(void)
 #	define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
 #	define putms(ld)	dcf1dbg_me("%3ld ms", ld / 1000000)
 
-	long delta_msec = 0;
+	struct timespec dt;
 
 	/* Read the current state of data */
 	dev.data = dcf1_read_data_pin();
@@ -243,11 +259,10 @@ static long dcf1_measure(void)
 		putms(dev.t_end.tv_nsec);
 
 		/* Subtract t2 - t1 and display result */
-		/* TODO Replace with call to dcf1_timespec_sub() */
-		delta_msec = (dev.t_end.tv_nsec - dev.t_start.tv_nsec) / 1000000;
+		dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dt);
 
 		dcf1dbg_me(" (dt ");
-		putms((dev.t_end.tv_nsec - dev.t_start.tv_nsec));
+		putms((dt.tv_sec * 1000000000) + dt.tv_nsec);
 		dcf1dbg_me(")");
 	}
 	else
@@ -257,7 +272,7 @@ static long dcf1_measure(void)
 	}
 	dcf1dbg_me("\n");
 
-	return delta_msec;
+	return dt.tv_nsec / 1000000;
 }
 
 /* Decode the time delta measured into a bit. Return -1 on error. */
