@@ -63,6 +63,9 @@
 /* Calculate bits from time delta */
 #define DEBUG_DCF1_DECODE
 
+/* Display contents of receive buffer */
+//#define DEBUG_DCF1_RXBUF
+
 /***********************************************************************/
 /* Helpers                                                             */
 /***********************************************************************/
@@ -89,6 +92,11 @@
 #	define dcf1dbg_de	dcf1dbg
 #else
 #	define dcf1dbg_de(x...)
+#endif
+#ifdef DEBUG_DCF1_RXBUF
+#	define dcf1dbg_rx	dcf1dbg
+#else
+#	define dcf1dbg_rx(x...)
 #endif
 
 /***********************************************************************/
@@ -182,14 +190,14 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 {
 	unsigned short i;
 
-	dcf1dbg("dcf1 rxbuf ");
+	dcf1dbg_rx("dcf1 rxbuf ");
 	for (i = 0; i < rxbuflen; i++)
 	{
-		dcf1dbg("%d", (dev.rxbuf & (1 << i)) ? 1 : 0);
+		dcf1dbg_rx("%d", (dev.rxbuf & (1 << i)) ? 1 : 0);
 		if (((1+i) % split_nbit) == 0)
-			dcf1dbg(" ");
+			dcf1dbg_rx(" ");
 	}
-	dcf1dbg("\n");
+	dcf1dbg_rx("\n");
 }
 
 static void dcf1_rxbuf_append(const bool bit)
