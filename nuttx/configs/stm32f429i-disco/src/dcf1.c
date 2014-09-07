@@ -147,6 +147,7 @@ static struct dcf1_dev {
 
 	struct timespec	t_start; /* Time of low to high transition of data pin */
 	struct timespec t_end; /* Time of high to low transition of data pin */
+	struct timespec dt;
 
 	uint64_t rxbuf;
 } dev;
@@ -232,8 +233,6 @@ static long dcf1_measure(void)
 #	define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
 #	define putts(ts)	dcf1dbg_me("%d.%09ld s", ts.tv_sec, ts.tv_nsec)
 
-	struct timespec dt;
-
 	/* Read the current state of data */
 	dev.data = dcf1_read_data_pin();
 	dcf1dbg_me("dcf1 ME %d", dev.data);
@@ -259,10 +258,10 @@ static long dcf1_measure(void)
 		putts(dev.t_end);
 
 		/* Subtract t2 - t1 and display result */
-		dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dt);
+		dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dev.dt);
 
 		dcf1dbg_me(" (dt ");
-		putts(dt);
+		putts(dev.dt);
 		dcf1dbg_me(")");
 	}
 	else
@@ -272,7 +271,7 @@ static long dcf1_measure(void)
 	}
 	dcf1dbg_me("\n");
 
-	return dt.tv_nsec / 1000000;
+	return dev.dt.tv_nsec / 1000000;
 }
 
 /* Decode the time delta measured into a bit. Return -1 on error. */
