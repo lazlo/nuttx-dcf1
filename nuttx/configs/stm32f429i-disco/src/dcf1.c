@@ -245,6 +245,7 @@ static long dcf1_measure(void)
 		putms(dev.t_end.tv_nsec);
 
 		/* Subtract t2 - t1 and display result */
+		/* TODO Replace with call to dcf1_timespec_sub() */
 		delta_msec = (dev.t_end.tv_nsec - dev.t_start.tv_nsec) / 1000000;
 
 		dcf1dbg_me(" (dt ");
