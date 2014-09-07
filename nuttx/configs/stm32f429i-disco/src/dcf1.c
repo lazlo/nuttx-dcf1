@@ -139,7 +139,7 @@ static const struct file_operations dcf1_ops = {
 };
 
 static struct dcf1_dev {
-	bool	led_state;
+	bool	led_out_state;
 	sem_t	isr_sem;
 
 	bool	data;
@@ -238,8 +238,8 @@ static long dcf1_measure(void)
 	dcf1dbg_me("dcf1 ME %d", dev.data);
 
 	/* Make the LED mirror the current data state */
-	dev.led_state = dev.data;
-	dcf1_write_led_pin(dev.led_state);
+	dev.led_out_state = dev.data;
+	dcf1_write_led_pin(dev.led_out_state);
 
 	if (LOW2HIGH(dev))
 	{
@@ -372,7 +372,7 @@ static void dcf1_init(void)
 	dcf1dbg("dcf1_init\n");
 
 	/* Initialize the device state */
-	dev.led_state = true;
+	dev.led_out_state = true;
 	sem_init(&dev.isr_sem, 1, 0);
 
 	/* Setup pins */
