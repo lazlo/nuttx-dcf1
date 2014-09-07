@@ -417,7 +417,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 				/* Now that we have decoded a valid bit, we shall calculate
 				 * the delta between this and the last valid bit received. */
-				dcf1_timespec_sub(&ti_last, &ti, &tid);
+				dcf1_timespec_sub(&ti, &ti_last, &tid);
 
 				/* TODO Have macro symbol for 1800 ms. This value is the signal for
 				 * 	detecting the bits 58 and 59 when the interrupt for bit 0 occurs.
