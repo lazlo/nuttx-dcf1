@@ -142,8 +142,8 @@ static struct dcf1_dev {
 	bool	led_out_state;
 	sem_t	isr_sem;
 
-	bool	data;
-	bool	data_last;
+	bool	data_in_state;
+	bool	data_in_state_last;
 
 	struct timespec	t_start; /* Time of low to high transition of data pin */
 	struct timespec t_end; /* Time of high to low transition of data pin */
@@ -229,16 +229,16 @@ static void dcf1_rxbuf_append(const bool bit)
  * high-to-low transisition on the DATA pin in miliseconds. */
 static long dcf1_measure(void)
 {
-#	define LOW2HIGH(d)	(d.data_last == 0 && d.data == 1)
-#	define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
+#	define LOW2HIGH(d)	(d.data_in_state_last == 0 && d.data_in_state == 1)
+#	define HIGH2LOW(d)	(d.data_in_state_last == 1 && d.data_in_state == 0)
 #	define putts(ts)	dcf1dbg_me("%d.%09ld s", ts.tv_sec, ts.tv_nsec)
 
 	/* Read the current state of data */
-	dev.data = dcf1_read_data_pin();
-	dcf1dbg_me("dcf1 ME %d", dev.data);
+	dev.data_in_state = dcf1_read_data_pin();
+	dcf1dbg_me("dcf1 ME %d", dev.data_in_state);
 
 	/* Make the LED mirror the current data state */
-	dev.led_out_state = dev.data;
+	dev.led_out_state = dev.data_in_state;
 	dcf1_write_led_pin(dev.led_out_state);
 
 	if (LOW2HIGH(dev))
@@ -362,7 +362,7 @@ static int dcf1_procirq(int argc, char *argv[])
 		}
 
 		/* Prepare for new loop iteration */
-		dev.data_last = dev.data;
+		dev.data_in_state_last = dev.data_in_state;
 	}
 	return OK;
 }
