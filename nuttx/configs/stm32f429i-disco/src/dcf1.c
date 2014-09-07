@@ -200,6 +200,7 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 	dcf1dbg_rx("\n");
 }
 
+/* FIXME Shift only works up to 32 bits(?) */
 static void dcf1_rxbuf_append(const bool bit)
 {
 	/* Make space for one bit in the receive buffer */
@@ -297,7 +298,18 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
-/* Process data */
+/* Process data
+ *
+ * TODO Measure time between last and current interrupt that
+ * 	produced a valid bit. This information can than be
+ * 	used to find the 60th bit position (not modulated)
+ * 	by looking at the difference in time.
+ * 	One would expect that when an interrupt for the bit 0
+ * 	is triggered, the time since the last interrupt should
+ * 	be 800 ms from bit 58, 1000 ms for bit 59.
+ * 	So if the difference is 1800 ms and the current bit read
+ * 	is zero, we have found the beginning of the datagram.
+ */
 static int dcf1_procirq(int argc, char *argv[])
 {
 	long delta_msec = 0;
