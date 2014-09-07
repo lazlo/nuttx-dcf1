@@ -107,7 +107,7 @@ static void	dcf1_getreftime(struct timespec *t);
 
 /* Receive Buffer Management */
 
-static void	dcf1_rxbuf_show(void);
+static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 static void	dcf1_rxbuf_append(const bool bit);
 
 /* Initialization */
@@ -176,13 +176,16 @@ static void dcf1_getreftime(struct timespec *t)
 	clock_gettime(DCF1_REFCLOCK, t);
 }
 
-static void dcf1_rxbuf_show(void)
+static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
 {
-	int i;
+	unsigned short i;
+
 	dcf1dbg("dcf1 rxbuf ");
-	for (i = 0; i < 60; i++)
+	for (i = 0; i < rxbuflen; i++)
 	{
 		dcf1dbg("%d", (dev.rxbuf & (1 << i)) ? 1 : 0);
+		if (((1+i) % split_nbit) == 0)
+			dcf1dbg(" ");
 	}
 	dcf1dbg("\n");
 }
@@ -307,6 +310,10 @@ static int dcf1_procirq(int argc, char *argv[])
 			if (bit != -1)
 			{
 				dcf1_rxbuf_append(bit);
+
+				/* Display contents of receive buffer (for development)
+				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
+				dcf1_rxbuf_show(60, 20);
 			}
 
 			delta_msec = 0;
