@@ -364,6 +364,7 @@ static int dcf1_procirq(int argc, char *argv[])
 			}
 
 			delta_msec = 0;
+			memset(&dev.dt, 0, sizeof(dev.dt));
 		}
 
 		/* Prepare for new loop iteration */
