@@ -230,7 +230,7 @@ static long dcf1_measure(void)
 {
 #	define LOW2HIGH(d)	(d.data_last == 0 && d.data == 1)
 #	define HIGH2LOW(d)	(d.data_last == 1 && d.data == 0)
-#	define putms(ld)	dcf1dbg_me("%3ld ms", ld / 1000000)
+#	define putts(ts)	dcf1dbg_me("%d.%09ld s", ts.tv_sec, ts.tv_nsec)
 
 	struct timespec dt;
 
@@ -248,7 +248,7 @@ static long dcf1_measure(void)
 
 		/* Save the current time as t1 or t_START */
 		dcf1_getreftime(&dev.t_start);
-		putms(dev.t_start.tv_nsec);
+		putts(dev.t_start);
 	}
 	else if (HIGH2LOW(dev))
 	{
@@ -256,13 +256,13 @@ static long dcf1_measure(void)
 
 		/* Save the current time as t2 or t_END */
 		dcf1_getreftime(&dev.t_end);
-		putms(dev.t_end.tv_nsec);
+		putts(dev.t_end);
 
 		/* Subtract t2 - t1 and display result */
 		dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dt);
 
 		dcf1dbg_me(" (dt ");
-		putms((dt.tv_sec * 1000000000) + dt.tv_nsec);
+		putts(dt);
 		dcf1dbg_me(")");
 	}
 	else
