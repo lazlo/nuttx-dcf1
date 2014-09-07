@@ -139,6 +139,11 @@ static const struct file_operations dcf1_ops = {
 };
 
 static struct dcf1_dev {
+
+	uint32_t	gpio_data;
+	uint32_t	gpio_pon;
+	uint32_t	gpio_led;
+
 	bool	led_out_state;
 	sem_t	isr_sem;
 
@@ -158,17 +163,17 @@ static struct dcf1_dev {
 
 static bool dcf1_read_data_pin(void)
 {
-	return stm32_gpioread(GPIO_DCF1_DATA);
+	return stm32_gpioread(dev.gpio_data);
 }
 
 static void dcf1_write_pon_pin(const bool out)
 {
-	stm32_gpiowrite(GPIO_DCF1_PON, out);
+	stm32_gpiowrite(dev.gpio_pon, out);
 }
 
 static void dcf1_write_led_pin(const bool out)
 {
-	stm32_gpiowrite(GPIO_DCF1_LED, out);
+	stm32_gpiowrite(dev.gpio_led, out);
 }
 
 /* Turn the module on or off */
@@ -372,19 +377,22 @@ static void dcf1_init(void)
 	dcf1dbg("dcf1_init\n");
 
 	/* Initialize the device state */
+	dev.gpio_data = GPIO_DCF1_DATA;
+	dev.gpio_pon  = GPIO_DCF1_PON;
+	dev.gpio_led  = GPIO_DCF1_LED;
 	dev.led_out_state = true;
 	sem_init(&dev.isr_sem, 1, 0);
 
 	/* Setup pins */
-	stm32_configgpio(GPIO_DCF1_LED);
-	stm32_configgpio(GPIO_DCF1_PON);
-	stm32_configgpio(GPIO_DCF1_DATA);
+	stm32_configgpio(dev.gpio_led);
+	stm32_configgpio(dev.gpio_pon);
+	stm32_configgpio(dev.gpio_data);
 
 	/* Set default output levels (receiver and LED off by default) */
 	dcf1_enable(false);
 
 	/* Register handler for ext. interrupt on DCF1_DATA */
-	stm32_gpiosetevent(GPIO_DCF1_DATA, true, true, false, dcf1_interrupt);
+	stm32_gpiosetevent(dev.gpio_data, true, true, false, dcf1_interrupt);
 
 	/* Fork a process to wait for interrupts to process */
 	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
@@ -424,7 +432,7 @@ static ssize_t dcf1_read(file_t *filep, FAR char *buf, size_t buflen)
 	/* TODO Check if there is a DCF77 message we can read */
 	/* TODO Read a complete receieved DCF77 message */
 
-	*buf = stm32_gpioread(GPIO_DCF1_DATA);
+	*buf = stm32_gpioread(dev.gpio_data);
 
 	return OK;
 }
