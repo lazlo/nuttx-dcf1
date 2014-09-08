@@ -194,18 +194,18 @@ static void dcf1_getreftime(struct timespec *t)
 #if 1
 /* TODO Implement subtraction for timespec structures.
  * See http://lists.gnu.org/archive/html/bug-gnulib/2011-06/msg00371.html */
-static void dcf1_timespec_sub(struct timespec *min, struct timespec *sub,
+static void dcf1_timespec_sub(struct timespec min, struct timespec sub,
 				struct timespec *dif)
 {
-	if (min->tv_nsec < sub->tv_nsec)
+	if (min.tv_nsec < sub.tv_nsec)
 	{
 //		dcf1dbg(" -X- "); /* subtract with carry */
-		min->tv_nsec += NSEC_PER_SEC;
-		min->tv_sec  -= 1;
+		min.tv_nsec += NSEC_PER_SEC;
+		min.tv_sec  -= 1;
 	}
 
-	dif->tv_nsec = min->tv_nsec - sub->tv_nsec;
-	dif->tv_sec = min->tv_sec - sub->tv_sec;
+	dif->tv_nsec = min.tv_nsec - sub.tv_nsec;
+	dif->tv_sec = min.tv_sec - sub.tv_sec;
 }
 #else
 /* Subtract one timespect from the other and save the result in a third timespec structure */
@@ -279,7 +279,7 @@ static long dcf1_measure(void)
 #	define putts(ts)	dcf1dbg_me("%d.%09ld s", ts.tv_sec, ts.tv_nsec)
 #	define save_t_start()	dcf1_getreftime(&dev.t_start)
 #	define save_t_end()	dcf1_getreftime(&dev.t_end)
-#	define calc_dt()	dcf1_timespec_sub(&dev.t_end, &dev.t_start, &dev.dt)
+#	define calc_dt()	dcf1_timespec_sub(dev.t_end, dev.t_start, &dev.dt)
 
 	/* Read the current state of data */
 	dev.data_in_state = dcf1_read_data_pin();
@@ -416,7 +416,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 				/* Now that we have decoded a valid bit, we shall calculate
 				 * the delta between this and the last valid bit received. */
-				dcf1_timespec_sub(&ti, &ti_last, &tid);
+				dcf1_timespec_sub(ti, ti_last, &tid);
 
 				/* TODO Have macro symbol for 1800 ms. This value is the signal for
 				 * 	detecting the bits 58 and 59 when the interrupt for bit 0 occurs.
