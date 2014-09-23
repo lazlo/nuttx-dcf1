@@ -159,16 +159,19 @@ static struct dcf1_dev {
 
 static bool dcf1_read_data_pin(void)
 {
+	/* TODO Make independent of STM32 GPIO abstraction */
 	return stm32_gpioread(dev.gpio_data);
 }
 
 static void dcf1_write_pon_pin(const bool out)
 {
+	/* TODO Make independent of STM32 GPIO abstraction */
 	stm32_gpiowrite(dev.gpio_pon, out);
 }
 
 static void dcf1_write_led_pin(const bool out)
 {
+	/* TODO Make independent of STM32 GPIO abstraction */
 	stm32_gpiowrite(dev.gpio_led, out);
 }
 
@@ -464,6 +467,7 @@ static ssize_t dcf1_read(file_t *filep, FAR char *buf, size_t buflen)
 	/* TODO Check if there is a DCF77 message we can read */
 	/* TODO Read a complete receieved DCF77 message */
 
+	/* TODO Make independent of STM32 GPIO abstraction */
 	*buf = stm32_gpioread(dev.gpio_data);
 
 	return OK;
@@ -496,6 +500,8 @@ void dcf1_init(void)
 	dev.led_out_state = true;
 	sem_init(&dev.isr_sem, 1, 0);
 
+	/* TODO Make independent of STM32 GPIO abstraction */
+
 	/* Setup pins */
 	stm32_configgpio(dev.gpio_led);
 	stm32_configgpio(dev.gpio_pon);
@@ -503,6 +509,8 @@ void dcf1_init(void)
 
 	/* Set default output levels (receiver and LED off by default) */
 	dcf1_enable(false);
+
+	/* TODO Make independent of STM32 GPIO abstraction */
 
 	/* Register handler for ext. interrupt on DCF1_DATA */
 	stm32_gpiosetevent(dev.gpio_data, true, true, false, dcf1_interrupt);
