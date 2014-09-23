@@ -118,10 +118,6 @@ static void	dcf1_getreftime(struct timespec *t);
 static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 static void	dcf1_rxbuf_append(const bool bit);
 
-/* Initialization */
-
-static void	dcf1_init(void);
-
 /* Device File System Interface */
 
 static int	dcf1_open(file_t *filep);
@@ -447,45 +443,6 @@ static int dcf1_procirq(int argc, char *argv[])
 	return OK;
 }
 
-static void dcf1_init(void)
-{
-	dcf1dbg("dcf1_init\n");
-
-	/* Initialize the device state */
-	dev.gpio_data = GPIO_DCF1_DATA;
-	dev.gpio_pon  = GPIO_DCF1_PON;
-	dev.gpio_led  = GPIO_DCF1_LED;
-	dev.led_out_state = true;
-	sem_init(&dev.isr_sem, 1, 0);
-
-	/* Setup pins */
-	stm32_configgpio(dev.gpio_led);
-	stm32_configgpio(dev.gpio_pon);
-	stm32_configgpio(dev.gpio_data);
-
-	/* Set default output levels (receiver and LED off by default) */
-	dcf1_enable(false);
-
-	/* Register handler for ext. interrupt on DCF1_DATA */
-	stm32_gpiosetevent(dev.gpio_data, true, true, false, dcf1_interrupt);
-
-	/* Fork a process to wait for interrupts to process */
-	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
-
-	/* Enable the receiver module */
-	dcf1_enable(true);
-
-
-	/* Display min/max values for decoding (only for development) */
-	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
-		DCF1_DATA_0_MS,
-		DCF1_DATA_0_MIN_MS,
-		DCF1_DATA_0_MAX_MS,
-		DCF1_DATA_1_MS,
-		DCF1_DATA_1_MIN_MS,
-		DCF1_DATA_1_MAX_MS);
-}
-
 static int dcf1_open(file_t *filep)
 {
 	dcf1dbg("dcf1_open\n");
@@ -528,10 +485,44 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 /* Public Functions                                                    */
 /***********************************************************************/
 
-void up_dcf1(void)
+static void dcf1_init(void)
 {
-	dcf1dbg("up_dcf1\n");
-	dcf1_init();
+	dcf1dbg("dcf1_init\n");
 
+	/* Initialize the device state */
+	dev.gpio_data = GPIO_DCF1_DATA;
+	dev.gpio_pon  = GPIO_DCF1_PON;
+	dev.gpio_led  = GPIO_DCF1_LED;
+	dev.led_out_state = true;
+	sem_init(&dev.isr_sem, 1, 0);
+
+	/* Setup pins */
+	stm32_configgpio(dev.gpio_led);
+	stm32_configgpio(dev.gpio_pon);
+	stm32_configgpio(dev.gpio_data);
+
+	/* Set default output levels (receiver and LED off by default) */
+	dcf1_enable(false);
+
+	/* Register handler for ext. interrupt on DCF1_DATA */
+	stm32_gpiosetevent(dev.gpio_data, true, true, false, dcf1_interrupt);
+
+	/* Fork a process to wait for interrupts to process */
+	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
+
+	/* Enable the receiver module */
+	dcf1_enable(true);
+
+
+	/* Display min/max values for decoding (only for development) */
+	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
+		DCF1_DATA_0_MS,
+		DCF1_DATA_0_MIN_MS,
+		DCF1_DATA_0_MAX_MS,
+		DCF1_DATA_1_MS,
+		DCF1_DATA_1_MIN_MS,
+		DCF1_DATA_1_MAX_MS);
+
+	/* Finally register the driver */
 	(void)register_driver("/dev/dcf1", &dcf1_ops, 0444, NULL);
 }
