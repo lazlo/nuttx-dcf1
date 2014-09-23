@@ -531,6 +531,16 @@ if WIRELESS
 source drivers/wireless/Kconfig
 endif # WIRELESS
 
+menuconfig RADIO
+	bool "Radio Device Support"
+	default n
+	---help---
+		Drivers for various radio devices.
+
+if RADIO
+source drivers/radio/Kconfig
+endif # RADIO
+
 comment "System Logging Device Options"
 
 source drivers/syslog/Kconfig
