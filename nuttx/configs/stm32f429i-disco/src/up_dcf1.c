@@ -80,4 +80,5 @@ static void up_disable(FAR const struct dcf1_lower_s *lower)
 
 void up_dcf1initialize(void)
 {
+  dcf1_init();
 }
