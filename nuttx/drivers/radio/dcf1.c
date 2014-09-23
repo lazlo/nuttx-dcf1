@@ -24,6 +24,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
+#include <debug.h>
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
