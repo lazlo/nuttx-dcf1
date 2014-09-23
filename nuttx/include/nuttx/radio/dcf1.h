@@ -8,3 +8,7 @@ struct dcf1_lower_s
   void (*enable)(FAR const struct dcf1_lower_s *lower);
   void (*disable)(FAR const struct dcf1_lower_s *lower);
 };
+
+/* Initialization */
+
+void	dcf1_init(void);
