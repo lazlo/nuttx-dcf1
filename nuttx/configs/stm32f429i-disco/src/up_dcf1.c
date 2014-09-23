@@ -129,5 +129,6 @@ static void gpiowrite(uint32_t pinset, bool value)
 
 void up_dcf1initialize(void)
 {
-  dcf1_init(&g_dcf1gpio.pinops, GPIO_DCF1_DATA, GPIO_DCF1_PON, GPIO_DCF1_LED);
+  dcf1_init(&g_dcf1gpio.pinops, GPIO_DCF1_DATA, GPIO_DCF1_PON, GPIO_DCF1_LED,
+            &g_dcf1lower.lower);
 }
