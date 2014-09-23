@@ -79,6 +79,31 @@ static void up_disable(FAR const struct dcf1_lower_s *lower)
 }
 
 /****************************************************************************
+ * Name struct dcf1_gpio_s methods
+ ****************************************************************************/
+
+static int configgpio(uint32_t cfgset)
+{
+	return stm32_configgpio(cfgset);
+}
+
+static xcpt_t gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                           bool event, xcpt_t func)
+{
+	return stm32_gpiosetevent(pinset, risingedge, fallingedge, event, func);
+}
+
+static bool gpioread(uint32_t pinset)
+{
+	return stm32_gpioread(pinset);
+}
+
+static void gpiowrite(uint32_t pinset, bool value)
+{
+	stm32_gpiowrite(pinset, value);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
