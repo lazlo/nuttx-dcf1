@@ -24,6 +24,8 @@ struct dcf1_gpio_s
 
 /* Initialization */
 
-void	dcf1_init(struct dcf1_gpio_s *pinops);
+void	dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
+                                              uint32_t ponpin,
+                                              uint32_t ledpin);
 
 #endif /* __INCLUDE_NUTTX_RADIO_DCF1_H */
