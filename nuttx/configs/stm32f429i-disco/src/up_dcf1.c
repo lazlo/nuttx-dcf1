@@ -24,6 +24,14 @@ static int  up_attach(FAR const struct dcf1_lower_s *lower, xcpt_t handler);
 static void up_enable(FAR const struct dcf1_lower_s *lower);
 static void up_disable(FAR const struct dcf1_lower_s *lower);
 
+/* GPIO Abstraction */
+
+static int configgpio(uint32_t cfgset);
+static xcpt_t gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                           bool event, xcpt_t func);
+static bool gpioread(uint32_t pinset);
+static void gpiowrite(uint32_t pinset, bool value);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
