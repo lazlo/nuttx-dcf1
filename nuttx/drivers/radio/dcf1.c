@@ -53,13 +53,19 @@
 #define DCF1_DATA_ERR_MS	30
 
 /* Measure time between DATA pin level transitions */
-//#define DEBUG_DCF1_MEASURE
+#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
+#define DEBUG_DCF1_MEASURE
+#endif
 
 /* Calculate bits from time delta */
+#ifdef CONFIG_DEBUG_DCF1_DECODE
 #define DEBUG_DCF1_DECODE
+#endif
 
 /* Display contents of receive buffer */
-//#define DEBUG_DCF1_RXBUF
+#ifdef CONFIG_DEBUG_DCF1_RX
+#define DEBUG_DCF1_RXBUF
+#endif
 
 /***********************************************************************/
 /* Helpers                                                             */
