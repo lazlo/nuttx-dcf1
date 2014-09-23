@@ -72,6 +72,10 @@
 #  include "stm32_usbhost.h"
 #endif
 
+#ifdef CONFIG_RADIO_DCF1
+#  include <nuttx/radio/dcf1.h>
+#endif
+
 #include "stm32.h"
 #include "stm32f429i-disco.h"
 
@@ -342,7 +346,11 @@ int nsh_archinitialize(void)
     }
 #endif
 
+#ifdef CONFIG_RADIO_DCF1
+  /* Initialize the DCF1 time signal receiver */
+
   up_dcf1initialize();
+#endif
 
   return OK;
 }
