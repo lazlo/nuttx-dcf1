@@ -40,6 +40,10 @@
 #error "CONFIG_NSH_ARCHINIT is not defined"
 #endif
 
+/* Device path to be used for the driver */
+
+#define DCF1_DEVFILE "/dev/dcf1"
+
 /* Specifies the clock id to use when measuring the time between DATA
  * pin level transitions.
  *
@@ -547,7 +551,7 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	dcf1_enable(true);
 
 	/* Finally register the driver */
-	(void)register_driver("/dev/dcf1", &dcf1_ops, 0444, NULL);
+	(void)register_driver(DCF1_DEVFILE, &dcf1_ops, 0444, NULL);
 
 	/* Display min/max values for decoding (only for development) */
 	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
