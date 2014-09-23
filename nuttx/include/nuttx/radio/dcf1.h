@@ -24,6 +24,6 @@ struct dcf1_gpio_s
 
 /* Initialization */
 
-void	dcf1_init(void);
+void	dcf1_init(struct dcf1_gpio_s *pinops);
 
 #endif /* __INCLUDE_NUTTX_RADIO_DCF1_H */

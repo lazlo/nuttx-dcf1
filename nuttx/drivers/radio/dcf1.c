@@ -135,6 +135,8 @@ static struct dcf1_dev {
 	uint32_t	gpio_pon;
 	uint32_t	gpio_led;
 
+	struct dcf1_gpio_s *pinops;
+
 	bool		led_out_state;
 	sem_t		isr_sem;
 
@@ -484,7 +486,7 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 /* Public Functions                                                    */
 /***********************************************************************/
 
-void dcf1_init(void)
+void dcf1_init(struct dcf1_gpio_s *pinops)
 {
 	dcf1dbg("dcf1_init\n");
 
@@ -492,6 +494,9 @@ void dcf1_init(void)
 	dev.gpio_data = GPIO_DCF1_DATA;
 	dev.gpio_pon  = GPIO_DCF1_PON;
 	dev.gpio_led  = GPIO_DCF1_LED;
+
+	dev.pinops = pinops;
+
 	dev.led_out_state = true;
 	sem_init(&dev.isr_sem, 1, 0);
 
