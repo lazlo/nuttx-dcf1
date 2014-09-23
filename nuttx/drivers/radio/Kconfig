@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config RADIO_DCF1
+	bool "DCF1 Time Signal Receiver"
+	default n
+	---help---
+		Enable support for the DCF1 time signal receiver module.
