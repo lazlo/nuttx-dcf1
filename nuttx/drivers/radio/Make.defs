@@ -43,8 +43,6 @@ ifeq ($(CONFIG_RADIO_DCF1),y)
   CSRCS += dcf1.c
 endif
 
-endif
-
 # Include radio build support
 
 DEPPATH += --dep-path radio
