@@ -36,6 +36,10 @@
 /* Configuration                                                       */
 /***********************************************************************/
 
+#ifndef CONFIG_NSH_ARCHINIT
+#error "CONFIG_NSH_ARCHINIT is not defined"
+#endif
+
 /* Specifies the clock id to use when measuring the time between DATA
  * pin level transitions.
  *
