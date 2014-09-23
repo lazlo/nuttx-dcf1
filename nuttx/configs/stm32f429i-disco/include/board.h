@@ -248,6 +248,12 @@
 #define BOARD_LTDC_WIDTH    240
 #define BOARD_LTDC_HEIGHT   320
 
+/* DCF1 Receiver */
+
+#define GPIO_DCF1_LED	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN2)
+#define GPIO_DCF1_PON	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN4)
+#define GPIO_DCF1_DATA	(GPIO_INPUT|GPIO_EXTI|GPIO_OPENDRAIN|GPIO_PORTF|GPIO_PIN5)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
