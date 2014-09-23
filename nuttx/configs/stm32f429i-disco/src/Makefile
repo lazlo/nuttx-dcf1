@@ -76,7 +76,7 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
 endif
 
-CSRCS += dcf1.c
+CSRCS += up_dcf1.c
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
