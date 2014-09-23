@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <nuttx/radio/dcf1.h>
+
 /***********************************************************************/
 /* Configuration                                                       */
 /***********************************************************************/
@@ -158,20 +160,17 @@ static struct dcf1_dev {
 
 static bool dcf1_read_data_pin(void)
 {
-	/* TODO Make independent of STM32 GPIO abstraction */
-	return stm32_gpioread(dev.gpio_data);
+	return (dev.pinops->read)(dev.gpio_data);
 }
 
 static void dcf1_write_pon_pin(const bool out)
 {
-	/* TODO Make independent of STM32 GPIO abstraction */
-	stm32_gpiowrite(dev.gpio_pon, out);
+	(dev.pinops->write)(dev.gpio_pon, out);
 }
 
 static void dcf1_write_led_pin(const bool out)
 {
-	/* TODO Make independent of STM32 GPIO abstraction */
-	stm32_gpiowrite(dev.gpio_led, out);
+	(dev.pinops->write)(dev.gpio_led, out);
 }
 
 /* Turn the module on or off */
@@ -467,7 +466,7 @@ static ssize_t dcf1_read(file_t *filep, FAR char *buf, size_t buflen)
 	/* TODO Read a complete receieved DCF77 message */
 
 	/* TODO Make independent of STM32 GPIO abstraction */
-	*buf = stm32_gpioread(dev.gpio_data);
+	*buf = (dev.pinops->read)(dev.gpio_data);
 
 	return OK;
 }
@@ -502,20 +501,16 @@ void dcf1_init(struct dcf1_gpio_s *pinops)
 	dev.led_out_state = true;
 	sem_init(&dev.isr_sem, 1, 0);
 
-	/* TODO Make independent of STM32 GPIO abstraction */
-
 	/* Setup pins */
-	stm32_configgpio(dev.gpio_led);
-	stm32_configgpio(dev.gpio_pon);
-	stm32_configgpio(dev.gpio_data);
+	(dev.pinops->config)(dev.gpio_led);
+	(dev.pinops->config)(dev.gpio_pon);
+	(dev.pinops->config)(dev.gpio_data);
 
 	/* Set default output levels (receiver and LED off by default) */
 	dcf1_enable(false);
 
-	/* TODO Make independent of STM32 GPIO abstraction */
-
 	/* Register handler for ext. interrupt on DCF1_DATA */
-	stm32_gpiosetevent(dev.gpio_data, true, true, false, dcf1_interrupt);
+	(dev.pinops->setevent)(dev.gpio_data, true, true, false, dcf1_interrupt);
 
 	/* Fork a process to wait for interrupts to process */
 	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
