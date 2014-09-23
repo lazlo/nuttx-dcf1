@@ -483,7 +483,7 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 /* Public Functions                                                    */
 /***********************************************************************/
 
-static void dcf1_init(void)
+void dcf1_init(void)
 {
 	dcf1dbg("dcf1_init\n");
 
