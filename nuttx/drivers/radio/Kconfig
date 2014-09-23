@@ -8,3 +8,18 @@ config RADIO_DCF1
 	default n
 	---help---
 		Enable support for the DCF1 time signal receiver module.
+if RADIO_DCF1
+
+config DEBUG_DCF1_MEASUREMENT
+	bool "Enable debug output for measurement stage"
+	default n
+
+config DEBUG_DCF1_DECODE
+	bool "Enable debug output for decoding stage"
+	default n
+
+config DEBUG_DCF1_RECEIVE
+	bool "Enable debug output for reception stage"
+	default n
+
+endif
