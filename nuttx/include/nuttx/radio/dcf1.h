@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __INCLUDE_NUTTX_RADIO_DCF1_H
+#define __INCLUDE_NUTTX_RADIO_DCF1_H
 
 #include <nuttx/irq.h>
 
@@ -12,3 +13,5 @@ struct dcf1_lower_s
 /* Initialization */
 
 void	dcf1_init(void);
+
+#endif /* __INCLUDE_NUTTX_RADIO_DCF1_H */
