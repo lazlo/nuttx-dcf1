@@ -470,7 +470,6 @@ static ssize_t dcf1_read(file_t *filep, FAR char *buf, size_t buflen)
 	/* TODO Check if there is a DCF77 message we can read */
 	/* TODO Read a complete receieved DCF77 message */
 
-	/* TODO Make independent of STM32 GPIO abstraction */
 	*buf = (*dev.pinops->read)(dev.gpio_data);
 
 	return OK;
