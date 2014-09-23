@@ -419,7 +419,7 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
 				dcf1_rxbuf_show(60, 20);
 
-#if 1
+#if 0
 				/* Save time to calculate delta between two received bits */
 				dcf1_getreftime(&ti);
 
