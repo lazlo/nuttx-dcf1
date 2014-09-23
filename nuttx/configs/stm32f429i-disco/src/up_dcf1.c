@@ -16,6 +16,11 @@ struct stm32_lower_s
   xcpt_t                    handler; /* DCF1 interrupt handler */
 };
 
+struct stm32_gpio_s
+{
+  struct dcf1_gpio_s pinops;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -49,10 +54,13 @@ static struct stm32_lower_s g_dcf1lower =
 
 static struct stm32_gpio_s g_dcf1gpio =
 {
-  .config    = configgpio,
-  .setevent  = gpiosetevent,
-  .read      = gpioread,
-  .write     = gpiowrite,
+  .pinops =
+  {
+    .config    = configgpio,
+    .setevent  = gpiosetevent,
+    .read      = gpioread,
+    .write     = gpiowrite,
+  }
 };
 
 /****************************************************************************
@@ -121,5 +129,5 @@ static void gpiowrite(uint32_t pinset, bool value)
 
 void up_dcf1initialize(void)
 {
-  dcf1_init(&g_dcf1gpio, GPIO_DCF1_DATA, GPIO_DCF1_PON, GPIO_DCF1_LED);
+  dcf1_init(&g_dcf1gpio.pinops, GPIO_DCF1_DATA, GPIO_DCF1_PON, GPIO_DCF1_LED);
 }
