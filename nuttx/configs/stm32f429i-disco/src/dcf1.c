@@ -31,14 +31,11 @@
 #include <errno.h>
 
 #include <stm32.h>
+#include <arch/board/board.h>
 
 /***********************************************************************/
 /* Configuration                                                       */
 /***********************************************************************/
-
-#define GPIO_DCF1_LED	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN2)
-#define GPIO_DCF1_PON	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN4)
-#define GPIO_DCF1_DATA	(GPIO_INPUT|GPIO_EXTI|GPIO_OPENDRAIN|GPIO_PORTF|GPIO_PIN5)
 
 /* Specifies the clock id to use when measuring the time between DATA
  * pin level transitions.
