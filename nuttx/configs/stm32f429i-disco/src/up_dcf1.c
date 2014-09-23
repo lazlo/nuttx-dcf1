@@ -121,5 +121,5 @@ static void gpiowrite(uint32_t pinset, bool value)
 
 void up_dcf1initialize(void)
 {
-  dcf1_init();
+  dcf1_init(&g_dcf1gpio);
 }
