@@ -522,16 +522,6 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	/* Fork a process to wait for interrupts to process */
 	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
 
-
-	/* Display min/max values for decoding (only for development) */
-	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
-		DCF1_DATA_0_MS,
-		DCF1_DATA_0_MIN_MS,
-		DCF1_DATA_0_MAX_MS,
-		DCF1_DATA_1_MS,
-		DCF1_DATA_1_MIN_MS,
-		DCF1_DATA_1_MAX_MS);
-
 	/* Attach the interrupt to the driver */
 
 	if (dev.lower->attach(dev.lower, dcf1_interrupt))
@@ -544,4 +534,13 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 
 	/* Finally register the driver */
 	(void)register_driver("/dev/dcf1", &dcf1_ops, 0444, NULL);
+
+	/* Display min/max values for decoding (only for development) */
+	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
+		DCF1_DATA_0_MS,
+		DCF1_DATA_0_MIN_MS,
+		DCF1_DATA_0_MAX_MS,
+		DCF1_DATA_1_MS,
+		DCF1_DATA_1_MIN_MS,
+		DCF1_DATA_1_MAX_MS);
 }
