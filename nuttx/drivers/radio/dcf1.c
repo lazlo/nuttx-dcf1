@@ -485,14 +485,15 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 /* Public Functions                                                    */
 /***********************************************************************/
 
-void dcf1_init(struct dcf1_gpio_s *pinops)
+void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
+					uint32_t ponpin, uint32_t ledpin)
 {
 	dcf1dbg("dcf1_init\n");
 
 	/* Initialize the device state */
-	dev.gpio_data = GPIO_DCF1_DATA;
-	dev.gpio_pon  = GPIO_DCF1_PON;
-	dev.gpio_led  = GPIO_DCF1_LED;
+	dev.gpio_data = datapin;
+	dev.gpio_pon  = ponpin;
+	dev.gpio_led  = ledpin;
 
 	dev.pinops = pinops;
 
