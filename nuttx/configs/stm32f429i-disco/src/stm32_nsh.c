@@ -342,7 +342,7 @@ int nsh_archinitialize(void)
     }
 #endif
 
-  up_dcf1();
+  up_dcf1initialize();
 
   return OK;
 }
