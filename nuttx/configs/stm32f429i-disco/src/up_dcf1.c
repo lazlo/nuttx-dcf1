@@ -47,6 +47,14 @@ static struct stm32_lower_s g_dcf1lower =
   .handler = NULL,
 };
 
+static struct stm32_gpio_s g_dcf1gpio =
+{
+  .config    = configgpio,
+  .setevent  = gpiosetevent,
+  .read      = gpioread,
+  .write     = gpiowrite,
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
