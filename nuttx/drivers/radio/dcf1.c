@@ -44,6 +44,11 @@
  *
  * RTOS Features ---> Clocks and Timers ---> [*] Support CLOCK_MONOTONIC
  */
+
+#ifndef CONFIG_CLOCK_MONOTONIC
+#error "CLOCK_MONOTONIC=y needs to be set in .config"
+#endif
+
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
 /* Configuration for decoding the signal provided by the DCF1 module */
