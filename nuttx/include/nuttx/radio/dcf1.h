@@ -15,7 +15,7 @@ struct dcf1_lower_s
 
 struct dcf1_gpio_s
 {
-  int (*config);
+  int (*config)(uint32_t cfgset);
   xcpt_t (*setevent)(uint32_t pinset, bool risingedge, bool fallingedge,
                      bool event, xcpt_t func);
   bool (*read)(uint32_t pinset);
