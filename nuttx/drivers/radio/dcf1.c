@@ -179,6 +179,12 @@ static void dcf1_enable(const bool onoff)
 	/* Disable receiver module by pulling pin high */
 	dcf1_write_pon_pin(!onoff);
 	dcf1_write_led_pin(onoff);
+
+	/* Enable or disable the interrupt */
+	if (onoff)
+		dev.lower->enable(dev.lower);
+	else
+		dev.lower->disable(dev.lower);
 }
 
 static void dcf1_getreftime(struct timespec *t)
@@ -511,14 +517,8 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	/* Set default output levels (receiver and LED off by default) */
 	dcf1_enable(false);
 
-	/* Register handler for ext. interrupt on DCF1_DATA */
-	(*dev.pinops->setevent)(dev.gpio_data, true, true, false, dcf1_interrupt);
-
 	/* Fork a process to wait for interrupts to process */
 	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
-
-	/* Enable the receiver module */
-	dcf1_enable(true);
 
 
 	/* Display min/max values for decoding (only for development) */
@@ -529,6 +529,16 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 		DCF1_DATA_1_MS,
 		DCF1_DATA_1_MIN_MS,
 		DCF1_DATA_1_MAX_MS);
+
+	/* Attach the interrupt to the driver */
+
+	if (dev.lower->attach(dev.lower, dcf1_interrupt))
+	{
+		return;
+	}
+
+	/* Enable the receiver module (enables the interrupt as well) */
+	dcf1_enable(true);
 
 	/* Finally register the driver */
 	(void)register_driver("/dev/dcf1", &dcf1_ops, 0444, NULL);
