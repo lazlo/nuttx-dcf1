@@ -21,6 +21,7 @@ struct dcf1_gpio_s
   bool (*read)(uint32_t pinset);
   void (*write)(uint32_t pinset, bool value);
 };
+
 /* Initialization */
 
 void	dcf1_init(void);
