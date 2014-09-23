@@ -6,6 +6,7 @@
 config RADIO_DCF1
 	bool "DCF1 Time Signal Receiver"
 	default n
+	depends on CLOCK_MONOTONIC
 	---help---
 		Enable support for the DCF1 time signal receiver module.
 if RADIO_DCF1
