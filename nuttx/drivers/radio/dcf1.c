@@ -10,6 +10,10 @@
  * - CONFIG_NSH_ARCHINIT=y
  *
  *   Application Configuration ---> NSH Library ---> [*] Have architecture-specific initialization
+ *
+ * - CONFIG_RADIO_DCF1=y
+ *
+ *   Device Drivers ---> Radio Device Support ---> [*] DCF1 Time Signal Receiver
  */
 
 /* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
