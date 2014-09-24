@@ -60,6 +60,7 @@
  * RTOS Features ---> Clocks and Timers ---> [*] Support CLOCK_MONOTONIC
  */
 
+/* TODO Better check for CLOCK_MONOTONIC symbol ifself. */
 #ifndef CONFIG_CLOCK_MONOTONIC
 #error "CLOCK_MONOTONIC=y needs to be set in .config"
 #endif
