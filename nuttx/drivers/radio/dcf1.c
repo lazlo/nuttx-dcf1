@@ -37,13 +37,35 @@
 
 #include <nuttx/radio/dcf1.h>
 
-/***********************************************************************/
-/* Configuration                                                       */
-/***********************************************************************/
+/***********************************************************************
+ * Pre-processor Definitions
+ ***********************************************************************/
 
 #ifndef CONFIG_NSH_ARCHINIT
-#error "CONFIG_NSH_ARCHINIT is not defined"
+#  error "CONFIG_NSH_ARCHINIT is not defined"
 #endif
+
+/* TODO Better check for CLOCK_MONOTONIC symbol ifself. */
+#ifndef CONFIG_CLOCK_MONOTONIC
+#  error "CLOCK_MONOTONIC=y needs to be set in .config"
+#endif
+
+/* Measure time between DATA pin level transitions */
+#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
+#  define DEBUG_DCF1_MEASURE
+#endif
+
+/* Calculate bits from time delta */
+#ifdef CONFIG_DEBUG_DCF1_DECODE
+#  define DEBUG_DCF1_DECODE
+#endif
+
+/* Display contents of receive buffer */
+#ifdef CONFIG_DEBUG_DCF1_RX
+#  define DEBUG_DCF1_RXBUF
+#endif
+
+/* Configuration *******************************************************/
 
 /* Device path to be used for the driver */
 
@@ -60,11 +82,6 @@
  * RTOS Features ---> Clocks and Timers ---> [*] Support CLOCK_MONOTONIC
  */
 
-/* TODO Better check for CLOCK_MONOTONIC symbol ifself. */
-#ifndef CONFIG_CLOCK_MONOTONIC
-#error "CLOCK_MONOTONIC=y needs to be set in .config"
-#endif
-
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
 /* Configuration for decoding the signal provided by the DCF1 module */
@@ -72,21 +89,6 @@
 #define DCF1_DATA_0_MS		100
 #define DCF1_DATA_1_MS		200
 #define DCF1_DATA_ERR_MS	30
-
-/* Measure time between DATA pin level transitions */
-#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
-#define DEBUG_DCF1_MEASURE
-#endif
-
-/* Calculate bits from time delta */
-#ifdef CONFIG_DEBUG_DCF1_DECODE
-#define DEBUG_DCF1_DECODE
-#endif
-
-/* Display contents of receive buffer */
-#ifdef CONFIG_DEBUG_DCF1_RX
-#define DEBUG_DCF1_RXBUF
-#endif
 
 /***********************************************************************/
 /* Helpers                                                             */
