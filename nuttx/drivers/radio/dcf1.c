@@ -186,6 +186,8 @@ static struct dcf1_dev {
 /* Private Functions                                                   */
 /***********************************************************************/
 
+/* GPIO Control ********************************************************/
+
 static bool dcf1_read_data_pin(void)
 {
 	return (*dev.pinops->read)(dev.gpio_data);
@@ -201,6 +203,8 @@ static void dcf1_write_led_pin(const bool out)
 	(*dev.pinops->write)(dev.gpio_led, out);
 }
 
+/* Module Control ******************************************************/
+
 /* Turn the module on or off */
 static void dcf1_enable(const bool onoff)
 {
@@ -215,6 +219,8 @@ static void dcf1_enable(const bool onoff)
 	else
 		dev.lower->disable(dev.lower);
 }
+
+/* Time and Math *******************************************************/
 
 static void dcf1_getreftime(struct timespec *t)
 {
@@ -276,6 +282,8 @@ static void timespec_sub(struct timespec *min, struct timespec *sub, struct time
 }
 #endif
 
+/* Receive Buffer Management *******************************************/
+
 static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
 {
 	unsigned short i;
@@ -299,6 +307,8 @@ static void dcf1_rxbuf_append(const bool bit)
 	if (bit)
 		dev.rxbuf |= 1;
 }
+
+/* Signal Processing ***************************************************/
 
 /* Measure the time difference between a low-to-high and the next
  * high-to-low transisition on the DATA pin in miliseconds. */
@@ -477,6 +487,8 @@ static int dcf1_procirq(int argc, char *argv[])
 	}
 	return OK;
 }
+
+/* File System Interface ***********************************************/
 
 static int dcf1_open(file_t *filep)
 {
