@@ -25,8 +25,6 @@
 /***********************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
 
 #include <debug.h>
 #include <time.h>
@@ -34,6 +32,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
 
 #include <nuttx/radio/dcf1.h>
 
