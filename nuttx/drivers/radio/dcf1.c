@@ -461,14 +461,6 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * the delta between this and the last valid bit received. */
 				dcf1_timespec_sub(ti, ti_last, &tid);
 
-				/* TODO Have macro symbol for 1800 ms. This value is the signal for
-				 * 	detecting the bits 58 and 59 when the interrupt for bit 0 occurs.
-				 * 	The value is composed of the following sequences of idle time.
-				 *
-				 * 	 - 800 ms idle time from bit 58, after the signal was active
-				 * 	 	for either 100 ms or 200 ms
-				 * 	 - 1000 ms idle time from bit 59 which has no modulation (active time)
-				 */
 				if (DCF1_IS_START(tid))
 					dcf1dbg("dcf1 SY found start ");
 				else
