@@ -106,6 +106,8 @@
 #define DCF1_IS_DATA_0(dt)	(dt >= DCF1_DATA_0_MIN_MS && dt <= DCF1_DATA_0_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt >= DCF1_DATA_1_MIN_MS && dt <= DCF1_DATA_1_MAX_MS)
 
+#define DCF1_IS_START(dt)	(dt.tv_sec == 1 && dt.tv_nsec / 1000000 >= 800)
+
 #define dcf1dbg	printf
 
 #ifdef DEBUG_DCF1_MEASURE
@@ -467,7 +469,7 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * 	 	for either 100 ms or 200 ms
 				 * 	 - 1000 ms idle time from bit 59 which has no modulation (active time)
 				 */
-				if (tid.tv_sec == 2)
+				if (DCF1_IS_START(tid))
 					dcf1dbg("dcf1 SY found start ");
 				else
 					dcf1dbg("dcf1 SY ?  ");
