@@ -462,9 +462,14 @@ static int dcf1_procirq(int argc, char *argv[])
 				dcf1_timespec_sub(ti, ti_last, &tid);
 
 				if (DCF1_IS_START(tid))
+				{
 					dcf1dbg("dcf1 SY found start ");
+					/* TODO Reset the current bit position counter to ... 0? */
+				}
 				else
+				{
 					dcf1dbg("dcf1 SY ?  ");
+				}
 
 				dcf1dbg(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
 
