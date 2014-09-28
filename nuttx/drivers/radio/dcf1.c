@@ -62,7 +62,7 @@
 #endif
 
 /* Display contents of receive buffer */
-#ifdef CONFIG_DEBUG_DCF1_RX
+#ifdef CONFIG_DEBUG_DCF1_RECEIVE
 #  define DEBUG_DCF1_RXBUF
 #endif
 
