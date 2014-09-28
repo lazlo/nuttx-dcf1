@@ -474,7 +474,7 @@ static int dcf1_procirq(int argc, char *argv[])
 				else
 					dcf1dbg("dcf1 SY ?  ");
 
-				dcf1dbg(" (dt %ld.%ld s)\n", tid.tv_sec, tid.tv_nsec / 1000000);
+				dcf1dbg(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
 
 				/* Save current time as last for next measurement */
 				memcpy(&ti_last, &ti, sizeof(ti));
