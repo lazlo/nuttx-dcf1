@@ -37,6 +37,7 @@
 #include <nuttx/clock.h>
 
 #include <nuttx/radio/dcf1.h>
+#include <nuttx/radio/dcf77.h>
 
 /***********************************************************************
  * Pre-processor Definitions
@@ -429,6 +430,39 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
+static void dcf77dump(struct dcf77msg m)
+{
+	int year = 0;
+	int month = 0;
+	int day = 0;
+
+	year += m.y1 ? 1 : 0;
+	year += m.y2 ? 2 : 0;
+	year += m.y4 ? 4 : 0;
+	year += m.y8 ? 8 : 0;
+	year += m.y10 ? 10 : 0;
+	year += m.y20 ? 20 : 0;
+	year += m.y40 ? 40 : 0;
+	year += m.y80 ? 80 : 0;
+
+	month += m.mn1 ? 1 : 0;
+	month += m.mn2 ? 2 : 0;
+	month += m.mn4 ? 4 : 0;
+	month += m.mn8 ? 8 : 0;
+	month += m.mn10 ? 10 : 0;
+
+	day += m.dm1 ? 1 : 0;
+	day += m.dm2 ? 2 : 0;
+	day += m.dm4 ? 4 : 0;
+	day += m.dm8 ? 8 : 0;
+	day += m.dm10 ? 10 : 0;
+	day += m.dm20 ? 20 : 0;
+
+	printf("Year: %d\n", year);
+	printf("Month: %d\n", month);
+	printf("Day: %d\n", day);
+}
+
 /* Process data
  *
  * TODO Measure time between last and current interrupt that
@@ -491,6 +525,8 @@ static int dcf1_procirq(int argc, char *argv[])
 				{
 					dcf1dbg("dcf1 SY found start ");
 					/* TODO Reset the current bit position counter to ... 0? */
+					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+					dcf77dump(*m);
 				}
 				else
 				{
