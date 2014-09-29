@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/arch.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <nuttx/pgalloc.h>
+#  include <nuttx/addrenv.h>
 #endif
 
 /****************************************************************************
@@ -90,7 +91,7 @@ do { \
   ); \
 } while (0)
 
-#endif
+#endif /* CONFIG_PIC */
 
 #ifdef CONFIG_ARCH_ADDRENV
 #if CONFIG_MM_PGSIZE != 4096
@@ -99,18 +100,24 @@ do { \
 
 /* Convert 4KiB pages to 1MiB sections */
 
-#  define __PG2SECT_SHIFT   (20 - MM_PGSHIFT)
-#  define __PG2SECT_MASK    ((1 << __PG2SECT_SHIFT) - 1)
+#  define __PG2SECT_SHIFT     (20 - MM_PGSHIFT)
+#  define __PG2SECT_MASK      ((1 << __PG2SECT_SHIFT) - 1)
 
-#  define ARCH_PG2SECT(p)   (((p) + __PG2SECT_MASK) >> __PG2SECT_SHIFT)
-#  define ARCH_SECT2PG(s)   ((s) << __PG2SECT_SHIFT)
+#  define ARCH_PG2SECT(p)     (((p) + __PG2SECT_MASK) >> __PG2SECT_SHIFT)
+#  define ARCH_SECT2PG(s)     ((s) << __PG2SECT_SHIFT)
 
-#  define ARCH_TEXT_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_TEXT_NPAGES)
-#  define ARCH_DATA_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
-#  define ARCH_HEAP_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
-#  define ARCH_STACK_NSECTS ARCH_PG2SECT(CONFIG_ARCH_STACK_NPAGES)
+#  define ARCH_TEXT_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_TEXT_NPAGES)
+#  define ARCH_DATA_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
+#  define ARCH_HEAP_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
 
-#endif
+#  ifdef CONFIG_MM_SHM
+#    define ARCH_SHM_NSECTS   ARCH_PG2SECT(ARCH_SHM_MAXPAGES)
+#  endif
+
+#  ifdef CONFIG_ARCH_STACK_DYNAMIC
+#    define ARCH_STACK_NSECTS ARCH_PG2SECT(CONFIG_ARCH_STACK_NPAGES)
+#  endif
+#endif /* CONFIG_ARCH_ADDRENV */
 
 /****************************************************************************
  * Inline functions
@@ -133,9 +140,24 @@ do { \
 
 struct group_addrenv_s
 {
+  /* Level 1 page table entries for each group section */
+
   FAR uintptr_t *text[ARCH_TEXT_NSECTS];
   FAR uintptr_t *data[ARCH_DATA_NSECTS];
+#ifdef CONFIG_BUILD_KERNEL
   FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
+#ifdef CONFIG_MM_SHM
+  FAR uintptr_t *shm[ARCH_SHM_NSECTS];
+#endif
+
+  /* Initial heap allocation (in bytes).  This exists only provide an
+   * indirect path for passing the size of the initial heap to the heap
+   * initialization logic.  These operations are separated in time and
+   * architecture.  REVISIT:  I would like a better way to do this.
+   */
+
+  size_t heapsize;
+#endif
 };
 
 typedef struct group_addrenv_s group_addrenv_t;
@@ -153,8 +175,11 @@ struct save_addrenv_s
 {
   FAR uint32_t text[ARCH_TEXT_NSECTS];
   FAR uint32_t data[ARCH_DATA_NSECTS];
-#if 0 /* Not yet implemented */
+#ifdef CONFIG_BUILD_KERNEL
   FAR uint32_t heap[ARCH_HEAP_NSECTS];
+#ifdef CONFIG_MM_SHM
+  FAR uint32_t shm[ARCH_SHM_NSECTS];
+#endif
 #endif
 };
 

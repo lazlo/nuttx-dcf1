@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <arch/irq.h>
 #include <nuttx/irq.h>
@@ -68,6 +69,8 @@
 #define HAVE_WM8904      1
 #define HAVE_AUDIO_NULL  1
 #define HAVE_PMIC        1
+#define HAVE_ELF         1
+#define HAVE_ROMFS       1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -396,6 +399,10 @@
 #endif
 
 #ifdef HAVE_WM8904
+#  ifdef CONFIG_SAMA5D4_MB_REVC
+#    warning WM8904 should not be used with the Rev C. board
+#  endif
+
 #  ifndef CONFIG_SAMA5_TWI0
 #    warning CONFIG_SAMA5_TWI0 is required for audio support
 #    undef HAVE_WM8904
@@ -453,6 +460,22 @@
 
 #ifndef CONFIG_EXPERIMENTAL
 #  undef HAVE_PMIC /* REVISIT: Disable anyway because it does not yet work */
+#endif
+
+/* ELF */
+
+#if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
+#  undef HAVE_ELF
+#endif
+
+/* ROMFS */
+
+#ifndef CONFIG_FS_ROMFS
+#  undef HAVE_ROMFS
+#endif
+
+#ifndef CONFIG_SAMA5D4EK_ROMFS_MOUNT
+#  undef HAVE_ROMFS
 #endif
 
 /* LEDs *****************************************************************************/

@@ -43,7 +43,9 @@
 #include <spawn.h>
 #include <debug.h>
 
+#include <nuttx/kthread.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/binfmt/symtab.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -424,10 +426,10 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    * task.
    */
 
-  proxy = task_create("posix_spawn_proxy", param.sched_priority,
-                      CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                      (main_t)posix_spawn_proxy,
-                      (FAR char * const *)NULL);
+  proxy = kernel_thread("posix_spawn_proxy", param.sched_priority,
+                        CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
+                        (main_t)posix_spawn_proxy,
+                        (FAR char * const *)NULL);
   if (proxy < 0)
     {
       ret = get_errno();

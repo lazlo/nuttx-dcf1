@@ -174,6 +174,12 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
+ *   EINVAL - There is something inconsistent in the symbol table (should only
+ *            happen if the file is corrupted)
+ *   ENOSYS - Symbol lies in common
+ *   ESRCH  - Symbol has no name
+ *   ENOENT - Symbol undefined and not provided via a symbol table
+ *
  ****************************************************************************/
 
 int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
@@ -277,6 +283,8 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo);
  *     for the ELF image (read/execute).
  *   datasize - The size (in bytes) of the .bss/.data address environment
  *     needed for the ELF image (read/write).
+ *   heapsize - The initial size (in bytes) of the heap address environment
+ *     needed by the task.  This region may be read/write only.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -284,13 +292,13 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
-                      size_t datasize);
+                      size_t datasize, size_t heapsize);
 
 /****************************************************************************
  * Name: elf_addrenv_select
  *
  * Description:
- *   Temporarity select the task's address environemnt.
+ *   Temporarily select the task's address environemnt.
  *
  * Input Parameters:
  *   loadinfo - Load state information

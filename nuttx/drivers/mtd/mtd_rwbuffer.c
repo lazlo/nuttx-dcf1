@@ -272,8 +272,8 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                */
 
               geo->blocksize    = priv->rwb.blocksize;
-              geo->erasesize    = priv->rwb.blocksize* priv->spb;
-              geo->neraseblocks = priv->rwb.nblocks * priv->spb;
+              geo->erasesize    = priv->rwb.blocksize * priv->spb;
+              geo->neraseblocks = priv->rwb.nblocks / priv->spb;
               ret               = OK;
 
               fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
@@ -376,7 +376,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
        */
 
       priv->spb          = geo.erasesize / geo.blocksize;
-      DEBUGASSERT((size_t)priv->spb * geo_blocksize = geo.erasesize);
+      DEBUGASSERT((size_t)priv->spb * geo.blocksize == geo.erasesize);
 
       /* Values must be provided to rwb_initialize() */
       /* Supported geometry */

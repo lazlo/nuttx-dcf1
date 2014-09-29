@@ -53,7 +53,7 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -240,11 +240,13 @@ errout:
  *
  ****************************************************************************/
 
+#ifndef CONFIG_BUILD_KERNEL
 int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 {
   return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size, entry, argv);
 }
+#endif
 
 /****************************************************************************
  * Name: kernel_thread
@@ -267,4 +269,3 @@ int kernel_thread(FAR const char *name, int priority,
 {
   return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size, entry, argv);
 }
-

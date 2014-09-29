@@ -33,8 +33,8 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/build/Make.defs
+include $(TOPDIR)/.config
+include $(TOPDIR)/build/Make.defs
 
 # Control build verbosity
 #
@@ -163,16 +163,19 @@ else
   ARCHCRT0OBJ = $(TOPDIR)$(DELIM)startup$(DELIM)crt0$(OBJEXT)
 endif
 
-CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+ARCHCFLAGS += -fno-common -pipe
+ARCHCXXFLAGS += -fno-common -pipe
+
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 
-CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
-CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
+CELFFLAGS = $(CFLAGS)
+CXXELFFLAGS = $(CXXFLAGS)
 
 # C Pre-processor
 
@@ -183,13 +186,13 @@ AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
-  LDLIBPATH = -L "${shell cygpath -w ${APPDIR}}" -L "${shell cygpath -w $(TOPDIR)$(DELIM)libs}"
+  LDLIBPATH = -L "${shell cygpath -w $(APPDIR)}" -L "${shell cygpath -w $(TOPDIR)$(DELIM)libs}"
 else
   # Linux/Cygwin-native toolchain
-  LDLIBPATH = -L ${APPDIR} -L $(TOPDIR)$(DELIM)libs
+  LDLIBPATH = -L $(APPDIR) -L $(TOPDIR)$(DELIM)libs
 endif
 
-LDLIBS = -lnuttx
+LDLIBS = -lapps -lnuttx
 
 # Try to get the path to libgcc.a.  Of course, this only works for GCC
 # toolchains.

@@ -48,7 +48,8 @@
 #include  <nuttx/fs/fs.h>
 #include  <nuttx/net/net.h>
 #include  <nuttx/lib.h>
-#include  <nuttx/mm.h>
+#include  <nuttx/mm/mm.h>
+#include  <nuttx/mm/shm.h>
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/init.h>
 
@@ -485,16 +486,17 @@ void os_start(void)
 
   up_initialize();
 
-  /* Initialize the C libraries (if included in the link).  This
-   * is done last because the libraries may depend on the above.
+#ifdef CONFIG_MM_SHM
+  /* Initialize shared memory support */
+
+  shm_initialize();
+#endif
+
+  /* Initialize the C libraries.  This is done last because the libraries
+   * may depend on the above.
    */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (lib_initialize != NULL)
-#endif
-    {
-      lib_initialize();
-    }
+  lib_initialize();
 
   /* IDLE Group Initialization **********************************************/
 #ifdef HAVE_TASK_GROUP

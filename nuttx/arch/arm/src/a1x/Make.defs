@@ -87,11 +87,27 @@ CMN_CSRCS += arm_va2pte.c
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c up_signal_dispatch.c
+CMN_CSRCS += up_task_start.c up_pthread_start.c arm_signal_dispatch.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CMN_CSRCS += arm_addrenv.c arm_pgalloc.c
+CMN_CSRCS += arm_addrenv.c arm_addrenv_utils.c arm_pgalloc.c
+ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
+CMN_CSRCS += arm_addrenv_ustack.c
+endif
+ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
+CMN_CSRCS += arm_addrenv_kstack.c
+endif
+ifeq ($(CONFIG_MM_SHM),y)
+CMN_CSRCS += arm_addrenv_shm.c
+endif
+endif
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CMN_CSRCS += arm_physpgaddr.c
+ifeq ($(CONFIG_ARCH_PGPOOL_MAPPING),y)
+CMN_CSRCS += arm_virtpgaddr.c
+endif
 endif
 
 ifeq ($(CONFIG_ELF),y)

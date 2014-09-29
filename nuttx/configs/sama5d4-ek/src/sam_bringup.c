@@ -50,18 +50,33 @@
 #  include <apps/usbmonitor.h>
 #endif
 
+#include <nuttx/fs/ramdisk.h>
+#include <nuttx/binfmt/elf.h>
+
 #include "sama5d4-ek.h"
+
+#ifdef HAVE_ROMFS
+#  include <arch/board/boot_romfsimg.h>
+#endif
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#define NSECTORS(n) \
+  (((n)+CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE-1) / \
+   CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE)
+
 /* Debug ********************************************************************/
 
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  define message(...) syslog(__VA_ARGS__)
+#ifdef CONFIG_BOARD_INITIALIZE
+#  define message lldbg
 #else
-#  define message syslog
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define message(...) syslog(__VA_ARGS__)
+#  else
+#    define message syslog
+#  endif
 #endif
 
 /****************************************************************************
@@ -78,9 +93,9 @@
 
 int sam_bringup(void)
 {
-#if defined(HAVE_NAND)    || defined(HAVE_AT25)       || defined(HAVE_HSMCI)  || \
+#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI)  || \
     defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
-    defined(HAVE_AUTOMOUNTER)
+    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS)
   int ret;
 #endif
 
@@ -118,6 +133,7 @@ int sam_bringup(void)
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
   else
     {
+      /* REVISIT:  A delay seems to be required here or the mount will fail. */
       /* Mount the volume on HSMCI0 */
 
       ret = mount(CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV,
@@ -147,6 +163,7 @@ int sam_bringup(void)
 #ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
   else
     {
+      /* REVISIT:  A delay seems to be required here or the mount will fail. */
       /* Mount the volume on HSMCI1 */
 
       ret = mount(CONFIG_SAMA5D4EK_HSMCI1_MOUNT_BLKDEV,
@@ -168,6 +185,32 @@ int sam_bringup(void)
   /* Initialize the auto-mounter */
 
   sam_automount_initialize();
+#endif
+
+#ifdef HAVE_ROMFS
+  /* Create a ROM disk for the /etc filesystem */
+
+  ret = romdisk_register(CONFIG_SAMA5D4EK_ROMFS_ROMDISK_MINOR, romfs_img,
+                         NSECTORS(romfs_img_len),
+                         CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE);
+  if (ret < 0)
+    {
+      message("ERROR: romdisk_register failed: %d\n", -ret);
+    }
+  else
+    {
+      /* Mount the file system */
+
+      ret = mount(CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
+                  CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT,
+                  "romfs", MS_RDONLY, NULL);
+      if (ret < 0)
+        {
+          message("ERROR: mount(%s,%s,romfs) failed: %d\n",
+                  CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
+                  CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, errno);
+        }
+    }
 #endif
 
 #ifdef HAVE_USBHOST
@@ -209,6 +252,17 @@ int sam_bringup(void)
   if (ret != OK)
     {
       message("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_ELF
+  /* Initialize the ELF binary loader */
+
+  message("Initializing the ELF binary loader\n");
+  ret = elf_initialize();
+  if (ret < 0)
+    {
+      message("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 

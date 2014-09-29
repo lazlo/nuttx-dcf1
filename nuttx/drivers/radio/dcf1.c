@@ -10,7 +10,13 @@
  * - CONFIG_NSH_ARCHINIT=y
  *
  *   Application Configuration ---> NSH Library ---> [*] Have architecture-specific initialization
+ *
+ * - CONFIG_RADIO_DCF1=y
+ *
+ *   Device Drivers ---> Radio Device Support ---> [*] DCF1 Time Signal Receiver
  */
+
+/* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
 
 /* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
 
@@ -19,20 +25,52 @@
 /***********************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
 
+#include <debug.h>
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
+
 #include <nuttx/radio/dcf1.h>
 
-/***********************************************************************/
-/* Configuration                                                       */
-/***********************************************************************/
+/***********************************************************************
+ * Pre-processor Definitions
+ ***********************************************************************/
+
+#ifndef CONFIG_NSH_ARCHINIT
+#  error "CONFIG_NSH_ARCHINIT is not defined"
+#endif
+
+/* TODO Better check for CLOCK_MONOTONIC symbol ifself. */
+#ifndef CONFIG_CLOCK_MONOTONIC
+#  error "CLOCK_MONOTONIC=y needs to be set in .config"
+#endif
+
+/* Measure time between DATA pin level transitions */
+#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
+#  define DEBUG_DCF1_MEASURE
+#endif
+
+/* Calculate bits from time delta */
+#ifdef CONFIG_DEBUG_DCF1_DECODE
+#  define DEBUG_DCF1_DECODE
+#endif
+
+/* Display contents of receive buffer */
+#ifdef CONFIG_DEBUG_DCF1_RECEIVE
+#  define DEBUG_DCF1_RXBUF
+#endif
+
+/* Configuration *******************************************************/
+
+/* Device path to be used for the driver */
+
+#define DCF1_DEVFILE "/dev/dcf1"
 
 /* Specifies the clock id to use when measuring the time between DATA
  * pin level transitions.
@@ -45,10 +83,6 @@
  * RTOS Features ---> Clocks and Timers ---> [*] Support CLOCK_MONOTONIC
  */
 
-#ifndef CONFIG_CLOCK_MONOTONIC
-#error "CLOCK_MONOTONIC=y needs to be set in .config"
-#endif
-
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
 /* Configuration for decoding the signal provided by the DCF1 module */
@@ -56,21 +90,6 @@
 #define DCF1_DATA_0_MS		100
 #define DCF1_DATA_1_MS		200
 #define DCF1_DATA_ERR_MS	30
-
-/* Measure time between DATA pin level transitions */
-#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
-#define DEBUG_DCF1_MEASURE
-#endif
-
-/* Calculate bits from time delta */
-#ifdef CONFIG_DEBUG_DCF1_DECODE
-#define DEBUG_DCF1_DECODE
-#endif
-
-/* Display contents of receive buffer */
-#ifdef CONFIG_DEBUG_DCF1_RX
-#define DEBUG_DCF1_RXBUF
-#endif
 
 /***********************************************************************/
 /* Helpers                                                             */
@@ -86,6 +105,8 @@
 
 #define DCF1_IS_DATA_0(dt)	(dt >= DCF1_DATA_0_MIN_MS && dt <= DCF1_DATA_0_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt >= DCF1_DATA_1_MIN_MS && dt <= DCF1_DATA_1_MAX_MS)
+
+#define DCF1_IS_START(dt)	(dt.tv_sec == 1 && dt.tv_nsec >= 8000000000)
 
 #define dcf1dbg	printf
 
@@ -168,6 +189,8 @@ static struct dcf1_dev {
 /* Private Functions                                                   */
 /***********************************************************************/
 
+/* GPIO Control ********************************************************/
+
 static bool dcf1_read_data_pin(void)
 {
 	return (*dev.pinops->read)(dev.gpio_data);
@@ -183,6 +206,8 @@ static void dcf1_write_led_pin(const bool out)
 	(*dev.pinops->write)(dev.gpio_led, out);
 }
 
+/* Module Control ******************************************************/
+
 /* Turn the module on or off */
 static void dcf1_enable(const bool onoff)
 {
@@ -197,6 +222,8 @@ static void dcf1_enable(const bool onoff)
 	else
 		dev.lower->disable(dev.lower);
 }
+
+/* Time and Math *******************************************************/
 
 static void dcf1_getreftime(struct timespec *t)
 {
@@ -258,12 +285,14 @@ static void timespec_sub(struct timespec *min, struct timespec *sub, struct time
 }
 #endif
 
+/* Receive Buffer Management *******************************************/
+
 static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
 {
 	unsigned short i;
 
 	dcf1dbg_rx("dcf1 rxbuf ");
-	for (i = 0; i < rxbuflen; i++)
+	for (i = rxbuflen; i > 0; i--)
 	{
 		dcf1dbg_rx("%d", (dev.rxbuf & (1 << i)) ? 1 : 0);
 		if (((1+i) % split_nbit) == 0)
@@ -275,12 +304,40 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 /* FIXME Shift only works up to 32 bits(?) */
 static void dcf1_rxbuf_append(const bool bit)
 {
+#if 0
+	uint32_t high = (dev.rxbuf >> 32) & 0xFFFF;
+	uint32_t low = dev.rxbuf;
+
+	/* Make space for the MSB bit from low in high */
+
+	high = high << 1;
+
+	/* Set least significant bit in high according the most significant bit in low */
+
+	if (low & (1 << 31))
+		high |= (1 << 0);
+	else
+		high &= ~(1 << 0);
+
+	/* Make space for the new bit in low */
+	low = low << 1;
+
+	if (bit)
+		low |= 1;
+
+	/* Write high and low back into the 64 bit rxbuf */
+	dev.rxbuf = ((uint64_t)high) << 32;
+	dev.rxbuf |= low;
+#else
 	/* Make space for one bit in the receive buffer */
 	dev.rxbuf <<= 1;
 
 	if (bit)
 		dev.rxbuf |= 1;
+#endif
 }
+
+/* Signal Processing ***************************************************/
 
 /* Measure the time difference between a low-to-high and the next
  * high-to-low transisition on the DATA pin in miliseconds. */
@@ -430,20 +487,17 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * the delta between this and the last valid bit received. */
 				dcf1_timespec_sub(ti, ti_last, &tid);
 
-				/* TODO Have macro symbol for 1800 ms. This value is the signal for
-				 * 	detecting the bits 58 and 59 when the interrupt for bit 0 occurs.
-				 * 	The value is composed of the following sequences of idle time.
-				 *
-				 * 	 - 800 ms idle time from bit 58, after the signal was active
-				 * 	 	for either 100 ms or 200 ms
-				 * 	 - 1000 ms idle time from bit 59 which has no modulation (active time)
-				 */
-				if (tid.tv_sec == 2)
+				if (DCF1_IS_START(tid))
+				{
 					dcf1dbg("dcf1 SY found start ");
+					/* TODO Reset the current bit position counter to ... 0? */
+				}
 				else
+				{
 					dcf1dbg("dcf1 SY ?  ");
+				}
 
-				dcf1dbg(" (dt %ld.%ld s)\n", tid.tv_sec, tid.tv_nsec / 1000000);
+				dcf1dbg(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
 
 				/* Save current time as last for next measurement */
 				memcpy(&ti_last, &ti, sizeof(ti));
@@ -459,6 +513,8 @@ static int dcf1_procirq(int argc, char *argv[])
 	}
 	return OK;
 }
+
+/* File System Interface ***********************************************/
 
 static int dcf1_open(file_t *filep)
 {
@@ -541,7 +597,7 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	dcf1_enable(true);
 
 	/* Finally register the driver */
-	(void)register_driver("/dev/dcf1", &dcf1_ops, 0444, NULL);
+	(void)register_driver(DCF1_DEVFILE, &dcf1_ops, 0444, NULL);
 
 	/* Display min/max values for decoding (only for development) */
 	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",

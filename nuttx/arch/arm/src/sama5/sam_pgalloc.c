@@ -41,16 +41,22 @@
 
 #include <sys/types.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/pgalloc.h>
 
 #include "chip.h"
+#include "mmu.h"
+#include "cache.h"
+
+#include "sam_pgalloc.h"
 
 #ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Currently, page cache memory must be allocated in DRAM.  There are other
  * possibilities, but the logic in this file will have to extended in order
@@ -89,7 +95,7 @@
  * Public Functions
  ****************************************************************************/
 
- /****************************************************************************
+/****************************************************************************
  * Name: up_allocate_pgheap
  *
  * Description:
@@ -104,9 +110,43 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size)
 {
   DEBUGASSERT(heap_start && heap_size);
 
-  *heap_start = (FAR void *)((uintptr_t)SAM_DDRCS_VSECTION +
+  *heap_start = (FAR void *)((uintptr_t)SAM_DDRCS_PSECTION +
                              CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
   *heap_size  = CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
 }
+
+/****************************************************************************
+ * Name: sam_virtpgaddr
+ *
+ * Description:
+ *   Check if the physical address lies in the page pool and, if so
+ *   get the mapping to the virtual address in the user data area.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
+uintptr_t sam_virtpgaddr(uintptr_t paddr)
+{
+  uintptr_t poolstart;
+  uintptr_t poolend;
+
+  /* REVISIT: Not implemented correctly.  The reverse lookup from physical
+   * to virtual.  This will return a kernel accessible virtual address, but
+   * not an address usable by the user code.
+   *
+   * The correct solutions is complex and, perhaps, will never be needed.
+   */
+
+  poolstart = ((uintptr_t)SAM_DDRCS_PSECTION + CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
+  poolend   = poolstart + CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
+
+  if (paddr >= poolstart && paddr < poolend)
+    {
+      return paddr - SAM_DDRCS_PSECTION + SAM_DDRCS_VSECTION;
+    }
+
+  return 0;
+}
+#endif /* !CONFIG_ARCH_PGPOOL_MAPPING */
 
 #endif /* CONFIG_MM_PGALLOC */

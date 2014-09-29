@@ -49,8 +49,9 @@
 
 #include "cache.h"
 #include "mmu.h"
+#include "pgalloc.h"
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +78,9 @@ static uintptr_t alloc_pgtable(void)
   irqstate_t flags;
   uintptr_t paddr;
   FAR uint32_t *l2table;
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
   uint32_t l1save;
+#endif
 
   /* Allocate one physical page for the L2 page table */
 
@@ -86,12 +89,19 @@ static uintptr_t alloc_pgtable(void)
     {
       DEBUGASSERT(MM_ISALIGNED(paddr));
 
+      flags = irqsave();
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+      /* Get the virtual address corresponding to the physical page address */
+
+      l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+#else
       /* Temporarily map the page into the virtual address space */
 
-      flags = irqsave();
       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
       mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
       l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+#endif
 
       /* Initialize the page table */
 
@@ -104,9 +114,11 @@ static uintptr_t alloc_pgtable(void)
       arch_flush_dcache((uintptr_t)l2table,
                         (uintptr_t)l2table + MM_PGSIZE);
 
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch section page table entry */
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
       irqrestore(flags);
     }
 
@@ -210,7 +222,9 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
   FAR uint32_t *l2table;
   irqstate_t flags;
   uintptr_t paddr;
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
   uint32_t l1save;
+#endif
   unsigned int index;
 
   DEBUGASSERT(tcb && tcb->group);
@@ -238,27 +252,36 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
     {
       /* Get the physical address of the level 2 page table */
 
-      paddr = get_pgtable(&group->addrenv, brkaddr);
+      paddr = get_pgtable(&group->tg_addrenv, brkaddr);
       if (paddr == 0)
         {
           return 0;
         }
 
+      flags = irqsave();
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+      /* Get the virtual address corresponding to the physical page address */
+
+      l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+#else
       /* Temporarily map the level 2 page table into the "scratch" virtual
        * address space
        */
 
-      flags = irqsave();
       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
       mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
       l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+#endif
 
       /* Back up L2 entry with physical memory */
 
       paddr = mm_pgalloc(1);
       if (paddr == 0)
         {
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
           mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
           irqrestore(flags);
           return 0;
         }
@@ -283,13 +306,15 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       arch_flush_dcache((uintptr_t)&l2table[index],
                         (uintptr_t)&l2table[index] + sizeof(uint32_t));
 
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch L1 page table entry */
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
       irqrestore(flags);
     }
 
   return brkaddr;
 }
 
-#endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_USE_MMU */
+#endif /* CONFIG_BUILD_KERNEL */

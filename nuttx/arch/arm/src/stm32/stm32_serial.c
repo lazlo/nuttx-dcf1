@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_serial.c
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 /* Some sanity checks *******************************************************/
 /* DMA configuration */
@@ -1308,8 +1308,6 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
-
-#endif
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -1327,7 +1325,7 @@ static void up_set_format(struct uart_dev_s *dev)
 
 static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rcc_en;
   uint32_t regaddr;
 
@@ -1375,13 +1373,13 @@ static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
 #endif
 #ifdef CONFIG_STM32_UART7
     case STM32_UART7_BASE:
-      rcc_en = RCC_APB1ENR_USART5EN;
+      rcc_en = RCC_APB1ENR_UART7EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32_UART8
     case STM32_UART8_BASE:
-      rcc_en = RCC_APB1ENR_USART5EN;
+      rcc_en = RCC_APB1ENR_UART8EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
@@ -2331,7 +2329,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
  * Name: up_txready
  *
  * Description:
- *   Return true if the tranmsit data register is empty
+ *   Return true if the transmit data register is empty
  *
  ****************************************************************************/
 
@@ -2530,6 +2528,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
   return OK;
 }
 #endif
+#endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
 /****************************************************************************

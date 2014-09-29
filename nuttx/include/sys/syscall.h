@@ -94,7 +94,7 @@
  * address environments.
  */
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 #  define SYS_task_create              (CONFIG_SYS_RESERVED+22)
 #  define __SYS_task_delete            (CONFIG_SYS_RESERVED+23)
 
@@ -102,11 +102,9 @@
  * allocator selected.  MMU support from the CPU is also required.
  */
 
-#elif defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#else
 #  define SYS_pgalloc                  (CONFIG_SYS_RESERVED+22)
 #  define __SYS_task_delete            (CONFIG_SYS_RESERVED+23)
-#else
-#  define __SYS_task_delete            (CONFIG_SYS_RESERVED+22)
 #endif
 
 #  define SYS_task_delete              __SYS_task_delete
@@ -142,29 +140,28 @@
 #  ifdef CONFIG_SCHED_HAVE_PARENT
 #    define SYS_wait                   (__SYS_waitpid+1)
 #    define SYS_waitid                 (__SYS_waitpid+2)
-#    define __SYS_posixspawn           (__SYS_waitpid+3)
+#    define __SYS_posix_spawn          (__SYS_waitpid+3)
 #  else
-#    define __SYS_posixspawn           (__SYS_waitpid+1)
+#    define __SYS_posix_spawn          (__SYS_waitpid+1)
 #endif
 #else
-#  define __SYS_posixspawn             __SYS_waitpid
+#  define __SYS_posix_spawn            __SYS_waitpid
 #endif
 
 /* The following can only be defined if we are configured to execute
  * programs from a file system.
  */
 
-#if defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
+#if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
 #  ifdef CONFIG_BINFMT_EXEPATH
-#    define SYS_posixspawnp            __SYS_posixspawn
+#    define SYS_posix_spawnp           __SYS_posix_spawn
 #  else
-#    define SYS_posixspawn             __SYS_posixspawn
+#    define SYS_posix_spawn            __SYS_posix_spawn
 #  endif
-#  define SYS_execv                    (__SYS_posixspawn+1)
-#  define SYS_execl                    (__SYS_posixspawn+2)
-#  define __SYS_signals                (__SYS_posixspawn+3)
+#  define SYS_execv                    (__SYS_posix_spawn+1)
+#  define __SYS_signals                (__SYS_posix_spawn+2)
 #else
-#  define __SYS_signals                __SYS_posixspawn
+#  define __SYS_signals                __SYS_posix_spawn
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
@@ -278,13 +275,25 @@
 #    define SYS_rmdir                  (__SYS_mountpoint+4)
 #    define SYS_umount                 (__SYS_mountpoint+5)
 #    define SYS_unlink                 (__SYS_mountpoint+6)
-#    define __SYS_pthread              (__SYS_mountpoint+7)
+#    define __SYS_shm                  (__SYS_mountpoint+7)
 #  else
-#    define __SYS_pthread              __SYS_mountpoint
+#    define __SYS_shm                  __SYS_mountpoint
 #  endif
 
 #else
-#  define __SYS_pthread                __SYS_filedesc
+#  define __SYS_shm                    __SYS_filedesc
+#endif
+
+/* Shared memory interfaces */
+
+#ifdef CONFIG_MM_SHM
+#    define SYS_shmget                 (__SYS_shm+0)
+#    define SYS_shmat                  (__SYS_shm+1)
+#    define SYS_shmctl                 (__SYS_shm+2)
+#    define SYS_shmdt                  (__SYS_shm+3)
+#    define __SYS_pthread              (__SYS_shm+4)
+#else
+#  define __SYS_pthread                __SYS_shm
 #endif
 
 /* The following are defined if pthreads are enabled */

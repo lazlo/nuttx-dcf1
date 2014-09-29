@@ -926,6 +926,8 @@ nuttx
  |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt
+ |   |- cc3200-launchpad/
+ |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
  |   |- compal_e86
@@ -1147,6 +1149,8 @@ nuttx
  |- libxx/
  |   `- README.txt
  |- mm/
+ |   |- shm/
+ |   |   `- README.txt
  |   `- README.txt
  |- net/
  |   `- README.txt

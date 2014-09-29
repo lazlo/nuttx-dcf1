@@ -724,27 +724,64 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  * is an abstract representation of a task group's address environment and
  * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
- *   up_addrenv_create  - Create an address environment
- *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_vtext   - Returns the virtual base address of the .text
- *                        address environment
- *   up_addrenv_vdata   - Returns the virtual base address of the .bss/.data
- *                        address environment
- *   up_addrenv_select  - Instantiate an address environment
- *   up_addrenv_restore - Restore an address environment
- *   up_addrenv_clone   - Copy an address environment from one location to
- *                        another.
+ *   up_addrenv_create   - Create an address environment
+ *   up_addrenv_destroy  - Destroy an address environment.
+ *   up_addrenv_vtext    - Returns the virtual base address of the .text
+ *                         address environment
+ *   up_addrenv_vdata    - Returns the virtual base address of the .bss/.data
+ *                         address environment
+ *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
+ *   up_addrenv_select   - Instantiate an address environment
+ *   up_addrenv_restore  - Restore an address environment
+ *   up_addrenv_clone    - Copy an address environment from one location to
+ *                         another.
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
  * used by the functions in sched/ and all operate on the thread which whose
  * group been assigned an address environment by up_addrenv_clone().
  *
- *   up_addrenv_attach  - Clone the address environment assigned to one TCB
- *                        to another.  This operation is done when a pthread
- *                        is created that share's the same address
- *                        environment.
- *   up_addrenv_detach  - Release the threads reference to an address
- *                        environment when a task/thread exits.
+ *   up_addrenv_attach   - Clone the address environment assigned to one TCB
+ *                         to another.  This operation is done when a pthread
+ *                         is created that share's the same address
+ *                         environment.
+ *   up_addrenv_detach   - Release the threads reference to an address
+ *                         environment when a task/thread exits.
+ *
+ * CONFIG_ARCH_STACK_DYNAMIC=y indicates that the user process stack resides
+ * in its own address space.  This options is also *required* if
+ * CONFIG_BUILD_KERNEL and CONFIG_LIBC_EXECFUNCS are selected.  Why?
+ * Because the caller's stack must be preserved in its own address space
+ * when we instantiate the environment of the new process in order to
+ * initialize it.
+ *
+ * NOTE: The naming of the CONFIG_ARCH_STACK_DYNAMIC selection implies that
+ * dynamic stack allocation is supported.  Certainly this option must be set
+ * if dynamic stack allocation is supported by a platform.  But the more
+ * general meaning of this configuration environment is simply that the
+ * stack has its own address space.
+ *
+ * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
+ * code must export these additional interfaces:
+ *
+ *   up_addrenv_ustackalloc  - Create a stack address environment
+ *   up_addrenv_ustackfree   - Destroy a stack address environment.
+ *   up_addrenv_vustack      - Returns the virtual base address of the stack
+ *   up_addrenv_ustackselect - Instantiate a stack address environment
+ *
+ * If CONFIG_ARCH_KERNEL_STACK is selected, then each user process will have
+ * two stacks:  (1) a large (and possibly dynamic) user stack and (2) a
+ * smaller kernel stack.  However, this option is *required* if both
+ * CONFIG_BUILD_KERNEL and CONFIG_LIBC_EXECFUNCS are selected.  Why?  Because
+ * when we instantiate and initialize the address environment of the new
+ * user process, we will temporarily lose the address environment of the old
+ * user process, including its stack contents.  The kernel C logic will crash
+ * immediately with no valid stack in place.
+ *
+ * If CONFIG_ARCH_KERNEL_STACK=y is selected then the platform specific
+ * code must export these additional interfaces:
+ *
+ *   up_addrenv_kstackalloc  - Create a stack in the kernel address environment
+ *   up_addrenv_kstackfree   - Destroy the kernel stack.
  *
  ****************************************************************************/
 /****************************************************************************
@@ -764,6 +801,8 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  *     actual size of the data region that is allocated will include a
  *     OS private reserved region at the beginning.  The size of the
  *     private, reserved region is give by ARCH_DATA_RESERVE_SIZE.
+ *   heapsize - The initial size (in bytes) of the heap address environment
+ *     needed by the task.  This region may be read/write only.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -773,7 +812,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_create(size_t textsize, size_t datasize,
+int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                       FAR group_addrenv_t *addrenv);
 #endif
 
@@ -848,6 +887,29 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_heapsize
+ *
+ * Description:
+ *   Return the initial heap allocation size.  That is the amount of memory
+ *   allocated by up_addrenv_create() when the heap memory region was first
+ *   created.  This may or may not differ from the heapsize parameter that
+ *   was passed to up_addrenv_create()
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *     returned by up_addrenv_create.
+ *
+ * Returned Value:
+ *   The initial heap size allocated is returned on success; a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -994,6 +1056,180 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_ustackalloc
+ *
+ * Description:
+ *   This function is called when a new thread is created in order to
+ *   instantiate an address environment for the new thread's stack.
+ *   up_addrenv_ustackalloc() is essentially the allocator of the physical
+ *   memory for the new task's stack.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that requires the stack address environment.
+ *   stacksize - The size (in bytes) of the initial stack address
+ *     environment needed by the task.  This region may be read/write only.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_ustackfree
+ *
+ * Description:
+ *   This function is called when any thread exits.  This function then
+ *   destroys the defunct address environment for the thread's stack,
+ *   releasing the underlying physical memory.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that no longer requires the stack address
+ *     environment.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_ustackfree(FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_vustack
+ *
+ * Description:
+ *   Return the virtual address associated with the newly create stack
+ *   address environment.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread with the stack address environment of
+ *     interest.
+ *   vstack - The location to return the stack virtual base address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_ustackselect
+ *
+ * Description:
+ *   After an address environment has been established for a task's stack
+ *   (via up_addrenv_ustackalloc().  This function may be called to instantiate
+ *   that address environment in the virtual address space.  This is a
+ *   necessary step before each context switch to the newly created thread
+ *   (including the initial thread startup).
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread with the stack address environment to be
+ *     instantiated.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_kstackalloc
+ *
+ * Description:
+ *   This function is called when a new thread is created to allocate
+ *   the new thread's kernel stack.   This function may be called for certain
+ *   terminating threads which have no kernel stack.  It must be tolerant of
+ *   that case.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that requires the kernel stack.
+ *   stacksize - The size (in bytes) of the kernel stack needed by the
+ *     thread.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+int up_addrenv_kstackalloc(FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_kstackfree
+ *
+ * Description:
+ *   This function is called when any thread exits.  This function frees
+ *   the kernel stack.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that no longer requires the kernel stack.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+int up_addrenv_kstackfree(FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_shmat
+ *
+ * Description:
+ *   Attach, i.e, map, on shared memory region to a user virtual address
+ *
+ * Input Parameters:
+ *   pages - A pointer to the first element in a array of physical address,
+ *     each corresponding to one page of memory.
+ *   npages - The number of pages in the list of physical pages to be mapped.
+ *   vaddr - The virtual address corresponding to the beginning of the
+ *     (contiguous) virtual address region.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_SHM
+int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
+#endif
+
+/****************************************************************************
+ * Name: up_shmdt
+ *
+ * Description:
+ *   Detach, i.e, unmap, on shared memory region from a user virtual address
+ *
+ * Input Parameters:
+ *   vaddr - The virtual address corresponding to the beginning of the
+ *     (contiguous) virtual address region.
+ *   npages - The number of pages to be unmapped
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_SHM
+int up_shmdt(uintptr_t vaddr, unsigned int npages);
 #endif
 
 /****************************************************************************

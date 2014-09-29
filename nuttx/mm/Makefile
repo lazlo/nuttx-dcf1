@@ -48,56 +48,19 @@ else
 endif
 endif
 
-# Core allocator logic
+# Sources and paths
 
 ASRCS  =
-CSRCS  = mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
-CSRCS += mm_shrinkchunk.c
-CSRCS += mm_brkaddr.c mm_calloc.c mm_extend.c mm_free.c mm_mallinfo.c
-CSRCS += mm_malloc.c mm_memalign.c mm_realloc.c mm_zalloc.c
+CSRCS  =
 
-ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CSRCS += mm_sbrk.c
-endif
+DEPPATH = --dep-path .
+VPATH = .
 
-# User allocator
-
-CSRCS += umm_initialize.c umm_addregion.c umm_sem.c
-CSRCS += umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
-CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c
-
-ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CSRCS += umm_sbrk.c
-endif
-
-# Kernel allocator
-
-ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
-CSRCS += kmm_initialize.c kmm_addregion.c kmm_sem.c
-CSRCS += kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
-CSRCS += kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c
-
-ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CSRCS += kmm_sbrk.c
-endif
-
-ifeq ($(CONFIG_DEBUG),y)
-CSRCS += kmm_heapmember.c
-endif
-endif
-
-# An optional granule allocator
-
-ifeq ($(CONFIG_GRAN),y)
-CSRCS += mm_graninit.c mm_granreserve.c mm_granalloc.c mm_granmark.c
-CSRCS += mm_granfree.c mm_grancritical.c
-
-# A page allocator based on the granule allocator
-
-ifeq ($(CONFIG_MM_PGALLOC),y)
-CSRCS += mm_pgalloc.c
-endif
-endif
+include mm_heap/Make.defs
+include umm_heap/Make.defs
+include kmm_heap/Make.defs
+include mm_gran/Make.defs
+include shm/Make.defs
 
 BINDIR ?= bin
 
@@ -145,10 +108,10 @@ endif
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
-	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
+	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
+	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
 else
-	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
+	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
 endif
 	$(Q) touch $@
 

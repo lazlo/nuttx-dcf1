@@ -82,9 +82,14 @@ static const char *dequote_list[] =
   "CONFIG_NXWM_STOP_BITMAP",           /* Name of bitmap image class */
   "CONFIG_NXWM_MINIMIZE_BITMAP",       /* Name of bitmap image class */
   "CONFIG_NXWM_STARTWINDOW_ICON",      /* Name of bitmap image class */
-  "CONFIG_NXWM_NXCONSOLE_ICON",        /* Name of bitmap image class */
+  "CONFIG_NXWM_NXTERM_ICON",           /* Name of bitmap image class */
   "CONFIG_NXWM_CALIBRATION_ICON",      /* Name of bitmap image class */
   "CONFIG_NXWM_HEXCALCULATOR_ICON",    /* Name of bitmap image class */
+
+  /* apps/ definitions */
+
+  "CONFIG_EXAMPLES_HELLO_PROGNAME",    /* Name of installed hello example program */
+  "CONFIG_EXAMPLES_NSH_PROGNAME",      /* Name of installed NSH example program */
 
   NULL                                 /* Marks the end of the list */
 };

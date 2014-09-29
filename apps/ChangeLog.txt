@@ -1032,4 +1032,39 @@
 	  build (2014-9-5).
 	* apps/Makefile, examples/elf/Kconfig, and import/Make.defs: Copy more
 	  logic from nuttx/tools/Config.mk into the Make.defs file (2014-9-5).
-	* apps/import/Make.defs: Also need to define CFLAGS (2014-9-5)
+	* apps/import/Make.defs: Also need to define CFLAGS (2015-9-5)
+	* apps/import/scripts/gnu-elf.ld:  Add GCC linker script for ELF
+	  import builds (2014-9-5).
+	* All Makefiles:  Add an install target to all makefiles.  For the
+	  import build, the top-level Makefile now does two passes: (1) builds
+	  libapp.a, then (2) installs the programs (not yet finished) (2014-9-6).
+	* Many files:  With kernel build (CONFIG_BUILD_KERNEL), entry point to
+	  all tasks is main, not some xyz_main (2014-9-6).
+	* Many Makefiles: Add program installation for CONFIG_BUILD_KERNEL in
+	  all Makefiles that build a main() (2014-9-6).
+	* Many Makefiles.  For kernel build, the object file containing main
+	  cannot go into library because of name collisions.  The object file
+	  must be handled as a special case in every Makefile (2014-9-7).
+	* apps/import/Make.defs: libapps.a needs to be added to the list of
+	  libraries to link against (2014-9-7).
+	* apps/nshlib/nsh.h and nsh_ddcmd.c: Several commands must be disabled
+	  in the kernel build because they depend on interfaces that are not
+	  available outside of the kernel: dd, df, losetup, mkfatfs, mkdr, and
+	  ps (2014-9-7).
+	* apps/import/Make.defs: ELF build reuires -fno-common in CFLAGS
+	  (2014-9-8).
+	* apps/tools/mkromfsimg.sh:  Add a script to create a BOOT ROMFS
+	  fileysystem image (2014-9-9).
+	* Many makefiles:  All makefiles that have separated the MAINOBJ
+	  need to include MAINOBJ in list of C objects to be compiled.
+	  SourceForge tick #31 from Aton (2014-9-11).
+	* apps/examples/elf/tests/Makefile and nxflat/tests/Makefile: Do
+	  not build test cases that use task_create is there is an address
+	  environment (2014-9-14).
+	* apps/xamples/null/null_main.c:  Need to include config.h it order know
+	  if this is or is not a kernel build (2014-9-16).
+	* Change all occurrences of NxConsole to NxTerm (2014-9-20).
+	* apps/examples/Konfig, Makefile, README.txt and all of mdrwb/: Add an
+	  example to test MTD R/W buffering (2014-9-25).
+	* apps/examples/ostest:  Add a trivial test of sem_timedwait (2014-9-16).
+
