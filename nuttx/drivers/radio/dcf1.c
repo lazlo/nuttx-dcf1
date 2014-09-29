@@ -331,10 +331,16 @@ static void dcf1_rxbuf_append(const bool bit)
 	dev.rxbuf |= low;
 #else
 	/* Make space for one bit in the receive buffer */
+#if 1
+	dev.rxbuf >>= 1;
+	if (bit)
+		dev.rxbuf |= ((uint64_t)1 << 63);
+#else
 	dev.rxbuf <<= 1;
 
 	if (bit)
 		dev.rxbuf |= 1;
+#endif
 #endif
 }
 
@@ -523,7 +529,7 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
 				dcf1_rxbuf_show(60, 20);
 
-#if 0
+#if 1
 				/* Save time to calculate delta between two received bits */
 				dcf1_getreftime(&ti);
 
@@ -535,8 +541,20 @@ static int dcf1_procirq(int argc, char *argv[])
 				{
 					dcf1dbg("dcf1 SY found start ");
 					/* TODO Reset the current bit position counter to ... 0? */
+
+
+					/* When shifting right, we right padd the
+					 * receive buffer by 4 bits */
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+
 					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+
 					dcf77dump(*m);
+
+					dev.rxbuf = 0;
 				}
 				else
 				{
