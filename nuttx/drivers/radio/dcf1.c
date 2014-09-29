@@ -432,9 +432,27 @@ static int dcf1_interrupt(int irq, void *context)
 
 static void dcf77dump(struct dcf77msg m)
 {
-	int year = 0;
-	int month = 0;
 	int day = 0;
+	int weekday = 0;
+	int month = 0;
+	int year = 0;
+
+	day += m.dm1 ? 1 : 0;
+	day += m.dm2 ? 2 : 0;
+	day += m.dm4 ? 4 : 0;
+	day += m.dm8 ? 8 : 0;
+	day += m.dm10 ? 10 : 0;
+	day += m.dm20 ? 20 : 0;
+
+	weekday += m.dw1 ? 1 : 0;
+	weekday += m.dw2 ? 2 : 0;
+	weekday += m.dw4 ? 4 : 0;
+
+	month += m.mn1 ? 1 : 0;
+	month += m.mn2 ? 2 : 0;
+	month += m.mn4 ? 4 : 0;
+	month += m.mn8 ? 8 : 0;
+	month += m.mn10 ? 10 : 0;
 
 	year += m.y1 ? 1 : 0;
 	year += m.y2 ? 2 : 0;
@@ -445,22 +463,14 @@ static void dcf77dump(struct dcf77msg m)
 	year += m.y40 ? 40 : 0;
 	year += m.y80 ? 80 : 0;
 
-	month += m.mn1 ? 1 : 0;
-	month += m.mn2 ? 2 : 0;
-	month += m.mn4 ? 4 : 0;
-	month += m.mn8 ? 8 : 0;
-	month += m.mn10 ? 10 : 0;
+	/* TODO Check parity bit 58 for bits 36 to 58 */
 
-	day += m.dm1 ? 1 : 0;
-	day += m.dm2 ? 2 : 0;
-	day += m.dm4 ? 4 : 0;
-	day += m.dm8 ? 8 : 0;
-	day += m.dm10 ? 10 : 0;
-	day += m.dm20 ? 20 : 0;
-
-	printf("Year: %d\n", year);
-	printf("Month: %d\n", month);
-	printf("Day: %d\n", day);
+	printf("\n");
+	printf("  Year:    %2d\n", year);
+	printf("  Month:   %2d\n", month);
+	printf("  Day:     %2d\n", day);
+	printf("  Weekday:  %d\n", weekday);
+	printf("\n");
 }
 
 /* Process data
