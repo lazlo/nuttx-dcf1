@@ -35,7 +35,7 @@ struct dcf77msg
 
   /*--- page 2 (20:39) ---*/
 
-  uint64_t start_time   : 1;  /* 20 - start of encoded time */
+  uint64_t start_time   : 1;  /* 20 - start of encoded time (always 1) */
 
   /* minutes + parity bit (21:28) */
 
