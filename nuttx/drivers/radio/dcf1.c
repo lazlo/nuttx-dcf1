@@ -29,6 +29,7 @@
 #include <debug.h>
 #include <time.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -417,6 +418,17 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
+/* Checks for the respective bits that make a valid DCF77 message */
+static bool dcf77valid(struct dcf77msg m)
+{
+	bool valid = false;
+
+	if (m.start_time == 1)
+		valid = true;
+
+	return valid;
+}
+
 static void dcf77dump(struct dcf77msg m)
 {
 	int minute = 0;
@@ -557,7 +569,14 @@ static int dcf1_procirq(int argc, char *argv[])
 
 					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
 
-					dcf77dump(*m);
+					if (dcf77valid(*m))
+					{
+						dcf77dump(*m);
+					}
+					else
+					{
+						dcf1dbg("dcf1 DCF77 msg invalid\n");
+					}
 
 					dev.rxbuf = 0;
 				}
