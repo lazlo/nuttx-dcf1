@@ -304,17 +304,25 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 
 static void dcf1_rxbuf_append(const bool bit)
 {
-	/* Make space for one bit in the receive buffer */
-#if 1
-	dev.rxbuf >>= 1;
-	if (bit)
-		dev.rxbuf |= ((uint64_t)1 << 63);
+#define APPEND_RIGHTSHIFT
+
+#ifdef APPEND_RIGHTSHIFT
+#	define make_space(b)	(b >>= 1)
 #else
-	dev.rxbuf <<= 1;
+#	define make_space(b)	(b <<= 1)
+#endif
+
+#ifdef APPEND_RIGHTSHIFT
+#	define append_bit(b)	(b |= ((uint64_t)1 << 63))
+#else
+#	define append_bit(b)	(b |= 1);
+#endif
+
+	/* Make space for one bit in the receive buffer */
+	make_space(dev.rxbuf);
 
 	if (bit)
-		dev.rxbuf |= 1;
-#endif
+		append_bit(dev.rxbuf);
 }
 
 /* Signal Processing ***************************************************/
