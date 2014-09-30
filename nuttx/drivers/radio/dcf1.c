@@ -419,10 +419,31 @@ static int dcf1_interrupt(int irq, void *context)
 
 static void dcf77dump(struct dcf77msg m)
 {
+	int minute = 0;
+	int hour = 0;
 	int day = 0;
 	int weekday = 0;
 	int month = 0;
 	int year = 0;
+
+	minute += m.m1 ? 1 : 0;
+	minute += m.m2 ? 2 : 0;
+	minute += m.m4 ? 4 : 0;
+	minute += m.m8 ? 8 : 0;
+	minute += m.m10 ? 10 : 0;
+	minute += m.m20 ? 20 : 0;
+	minute += m.m40 ? 40 : 0;
+
+	/* TODO parity for minute */
+
+	hour += m.h1 ? 1 : 0;
+	hour += m.h2 ? 2 : 0;
+	hour += m.h4 ? 4 : 0;
+	hour += m.h8 ? 8 : 0;
+	hour += m.h10 ? 10 : 0;
+	hour += m.h20 ? 20 : 0;
+
+	/* TODO partity for hour */
 
 	day += m.dm1 ? 1 : 0;
 	day += m.dm2 ? 2 : 0;
@@ -457,6 +478,9 @@ static void dcf77dump(struct dcf77msg m)
 	printf("  Month:   %2d\n", month);
 	printf("  Day:     %2d\n", day);
 	printf("  Weekday:  %d\n", weekday);
+	printf("\n");
+	printf("  Minute:  %2d\n", minute);
+	printf("  Hour:    %2d\n", hour);
 	printf("\n");
 }
 
