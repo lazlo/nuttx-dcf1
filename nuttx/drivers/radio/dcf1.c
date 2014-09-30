@@ -302,34 +302,8 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 	dcf1dbg_rx("\n");
 }
 
-/* FIXME Shift only works up to 32 bits(?) */
 static void dcf1_rxbuf_append(const bool bit)
 {
-#if 0
-	uint32_t high = (dev.rxbuf >> 32) & 0xFFFF;
-	uint32_t low = dev.rxbuf;
-
-	/* Make space for the MSB bit from low in high */
-
-	high = high << 1;
-
-	/* Set least significant bit in high according the most significant bit in low */
-
-	if (low & (1 << 31))
-		high |= (1 << 0);
-	else
-		high &= ~(1 << 0);
-
-	/* Make space for the new bit in low */
-	low = low << 1;
-
-	if (bit)
-		low |= 1;
-
-	/* Write high and low back into the 64 bit rxbuf */
-	dev.rxbuf = ((uint64_t)high) << 32;
-	dev.rxbuf |= low;
-#else
 	/* Make space for one bit in the receive buffer */
 #if 1
 	dev.rxbuf >>= 1;
@@ -340,7 +314,6 @@ static void dcf1_rxbuf_append(const bool bit)
 
 	if (bit)
 		dev.rxbuf |= 1;
-#endif
 #endif
 }
 
