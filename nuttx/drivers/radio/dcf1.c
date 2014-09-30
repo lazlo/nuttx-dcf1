@@ -127,6 +127,11 @@
 #else
 #	define dcf1dbg_rx(x...)
 #endif
+#ifdef DEBUG_DCF1_SYNC
+#	define dcf1dbg_sy	dcf1dbg
+#else
+#	define dcf1dbg_sy(x...)
+#endif
 
 /***********************************************************************/
 /***********************************************************************/
@@ -563,7 +568,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 				if (DCF1_IS_START(tid))
 				{
-					dcf1dbg("dcf1 SY found start ");
+					dcf1dbg_sy("dcf1 SY found start ");
 					/* TODO Reset the current bit position counter to ... 0? */
 
 
@@ -589,10 +594,10 @@ static int dcf1_procirq(int argc, char *argv[])
 				}
 				else
 				{
-					dcf1dbg("dcf1 SY ?  ");
+					dcf1dbg_sy("dcf1 SY ?  ");
 				}
 
-				dcf1dbg(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
+				dcf1dbg_sy(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
 
 				/* Save current time as last for next measurement */
 				memcpy(&ti_last, &ti, sizeof(ti));
