@@ -23,4 +23,8 @@ config DEBUG_DCF1_RECEIVE
 	bool "Enable debug output for reception stage"
 	default n
 
+config DEBUG_DCF1_SYNC
+	bool "Enable debug outfor for synchronization stage"
+	default n
+
 endif

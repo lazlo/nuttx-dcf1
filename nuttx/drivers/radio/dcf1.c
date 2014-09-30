@@ -29,6 +29,7 @@
 #include <debug.h>
 #include <time.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -37,6 +38,7 @@
 #include <nuttx/clock.h>
 
 #include <nuttx/radio/dcf1.h>
+#include <nuttx/radio/dcf77.h>
 
 /***********************************************************************
  * Pre-processor Definitions
@@ -106,7 +108,7 @@
 #define DCF1_IS_DATA_0(dt)	(dt >= DCF1_DATA_0_MIN_MS && dt <= DCF1_DATA_0_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt >= DCF1_DATA_1_MIN_MS && dt <= DCF1_DATA_1_MAX_MS)
 
-#define DCF1_IS_START(dt)	(dt.tv_sec == 1 && dt.tv_nsec >= 8000000000)
+#define DCF1_IS_START(dt)	(dt.tv_sec == 1 && dt.tv_nsec >= 800000000)
 
 #define dcf1dbg	printf
 
@@ -124,6 +126,11 @@
 #	define dcf1dbg_rx	dcf1dbg
 #else
 #	define dcf1dbg_rx(x...)
+#endif
+#ifdef DEBUG_DCF1_SYNC
+#	define dcf1dbg_sy	dcf1dbg
+#else
+#	define dcf1dbg_sy(x...)
 #endif
 
 /***********************************************************************/
@@ -294,47 +301,34 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 	dcf1dbg_rx("dcf1 rxbuf ");
 	for (i = rxbuflen; i > 0; i--)
 	{
-		dcf1dbg_rx("%d", (dev.rxbuf & (1 << i)) ? 1 : 0);
+		dcf1dbg_rx("%d", (dev.rxbuf & ((uint64_t)1 << i)) ? 1 : 0);
 		if (((1+i) % split_nbit) == 0)
 			dcf1dbg_rx(" ");
 	}
 	dcf1dbg_rx("\n");
 }
 
-/* FIXME Shift only works up to 32 bits(?) */
 static void dcf1_rxbuf_append(const bool bit)
 {
-#if 0
-	uint32_t high = (dev.rxbuf >> 32) & 0xFFFF;
-	uint32_t low = dev.rxbuf;
+#define APPEND_RIGHTSHIFT
 
-	/* Make space for the MSB bit from low in high */
-
-	high = high << 1;
-
-	/* Set least significant bit in high according the most significant bit in low */
-
-	if (low & (1 << 31))
-		high |= (1 << 0);
-	else
-		high &= ~(1 << 0);
-
-	/* Make space for the new bit in low */
-	low = low << 1;
-
-	if (bit)
-		low |= 1;
-
-	/* Write high and low back into the 64 bit rxbuf */
-	dev.rxbuf = ((uint64_t)high) << 32;
-	dev.rxbuf |= low;
+#ifdef APPEND_RIGHTSHIFT
+#	define make_space(b)	(b >>= 1)
 #else
+#	define make_space(b)	(b <<= 1)
+#endif
+
+#ifdef APPEND_RIGHTSHIFT
+#	define append_bit(b)	(b |= ((uint64_t)1 << 63))
+#else
+#	define append_bit(b)	(b |= 1);
+#endif
+
 	/* Make space for one bit in the receive buffer */
-	dev.rxbuf <<= 1;
+	make_space(dev.rxbuf);
 
 	if (bit)
-		dev.rxbuf |= 1;
-#endif
+		append_bit(dev.rxbuf);
 }
 
 /* Signal Processing ***************************************************/
@@ -429,6 +423,91 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
+/* Checks for the respective bits that make a valid DCF77 message */
+static bool dcf77valid(struct dcf77msg m)
+{
+	bool valid = false;
+
+	if (m.start_time == 1)
+		valid = true;
+
+	return valid;
+}
+
+static void dcf77dump(struct dcf77msg m)
+{
+	int minute = 0;
+	int hour = 0;
+	int day = 0;
+	int weekday = 0;
+	int month = 0;
+	int year = 0;
+
+	minute += m.m1 ? 1 : 0;
+	minute += m.m2 ? 2 : 0;
+	minute += m.m4 ? 4 : 0;
+	minute += m.m8 ? 8 : 0;
+	minute += m.m10 ? 10 : 0;
+	minute += m.m20 ? 20 : 0;
+	minute += m.m40 ? 40 : 0;
+
+	/* TODO parity for minute */
+
+	hour += m.h1 ? 1 : 0;
+	hour += m.h2 ? 2 : 0;
+	hour += m.h4 ? 4 : 0;
+	hour += m.h8 ? 8 : 0;
+	hour += m.h10 ? 10 : 0;
+	hour += m.h20 ? 20 : 0;
+
+	/* TODO partity for hour */
+
+	day += m.dm1 ? 1 : 0;
+	day += m.dm2 ? 2 : 0;
+	day += m.dm4 ? 4 : 0;
+	day += m.dm8 ? 8 : 0;
+	day += m.dm10 ? 10 : 0;
+	day += m.dm20 ? 20 : 0;
+
+	weekday += m.dw1 ? 1 : 0;
+	weekday += m.dw2 ? 2 : 0;
+	weekday += m.dw4 ? 4 : 0;
+
+	month += m.mn1 ? 1 : 0;
+	month += m.mn2 ? 2 : 0;
+	month += m.mn4 ? 4 : 0;
+	month += m.mn8 ? 8 : 0;
+	month += m.mn10 ? 10 : 0;
+
+	year += m.y1 ? 1 : 0;
+	year += m.y2 ? 2 : 0;
+	year += m.y4 ? 4 : 0;
+	year += m.y8 ? 8 : 0;
+	year += m.y10 ? 10 : 0;
+	year += m.y20 ? 20 : 0;
+	year += m.y40 ? 40 : 0;
+	year += m.y80 ? 80 : 0;
+
+	/* TODO Check parity bit 58 for bits 36 to 58 */
+
+	printf("\n");
+#if 1
+	printf("DCF77 Message: %4d-%02d-%02d (%d) %02d:%02d\n",
+		year + 2000, month, day,
+		weekday,
+		hour, minute);
+#else
+	printf("  Year:    %2d\n", year);
+	printf("  Month:   %2d\n", month);
+	printf("  Day:     %2d\n", day);
+	printf("  Weekday:  %d\n", weekday);
+	printf("\n");
+	printf("  Minute:  %2d\n", minute);
+	printf("  Hour:    %2d\n", hour);
+#endif
+	printf("\n");
+}
+
 /* Process data
  *
  * TODO Measure time between last and current interrupt that
@@ -479,7 +558,7 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
 				dcf1_rxbuf_show(60, 20);
 
-#if 0
+#if 1
 				/* Save time to calculate delta between two received bits */
 				dcf1_getreftime(&ti);
 
@@ -489,15 +568,36 @@ static int dcf1_procirq(int argc, char *argv[])
 
 				if (DCF1_IS_START(tid))
 				{
-					dcf1dbg("dcf1 SY found start ");
+					dcf1dbg_sy("dcf1 SY found start ");
 					/* TODO Reset the current bit position counter to ... 0? */
+
+
+					/* When shifting right, we right padd the
+					 * receive buffer by 4 bits */
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+
+					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+
+					if (dcf77valid(*m))
+					{
+						dcf77dump(*m);
+					}
+					else
+					{
+						dcf1dbg("dcf1 DCF77 msg invalid\n");
+					}
+
+					dev.rxbuf = 0;
 				}
 				else
 				{
-					dcf1dbg("dcf1 SY ?  ");
+					dcf1dbg_sy("dcf1 SY ?  ");
 				}
 
-				dcf1dbg(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
+				dcf1dbg_sy(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
 
 				/* Save current time as last for next measurement */
 				memcpy(&ti_last, &ti, sizeof(ti));
