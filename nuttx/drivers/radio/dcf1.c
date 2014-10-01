@@ -142,6 +142,7 @@ static void	dcf1_getreftime(struct timespec *t);
 
 /* Receive Buffer Management */
 
+static void	dcf1_rxbuf_reset(void);
 static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 static void	dcf1_rxbuf_append(const bool bit);
 
@@ -294,6 +295,11 @@ static void timespec_sub(struct timespec *min, struct timespec *sub, struct time
 #endif
 
 /* Receive Buffer Management *******************************************/
+
+static void dcf1_rxbuf_reset(void)
+{
+		dev.rxbuf = 0;
+}
 
 static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
 {
@@ -543,8 +549,8 @@ static void dcf1_synchonize(void)
 			dcf1dbg("dcf1 DCF77 msg invalid\n");
 		}
 
-		/* TODO Replaced with call to dcf1_rxbuf_reset() */
-		dev.rxbuf = 0;
+		/* Empty the receive buffer */
+		dcf1_rxbuf_reset();
 	}
 	else
 	{
