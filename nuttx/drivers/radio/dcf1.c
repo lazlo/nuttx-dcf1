@@ -536,8 +536,9 @@ static bool dcf1_synchonize(void)
 	dcf1dbg_sy("dcf1 SY ");
 	if (DCF1_IS_START(dev.tid))
 	{
-		dcf1dbg_sy("found start ");
 		rc = true;
+
+		dcf1dbg_sy("found start ");
 	}
 	else
 	{
