@@ -93,7 +93,8 @@
 #define DCF1_IS_DATA_0(dt)	(dt >= DCF1_DATA_0_MIN_MS && dt <= DCF1_DATA_0_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt >= DCF1_DATA_1_MIN_MS && dt <= DCF1_DATA_1_MAX_MS)
 
-#define DCF1_IS_START(dt)	(dt.tv_sec == 1 && dt.tv_nsec >= 800000000)
+/* TODO Make sure only 1.8s-2.0s will identified as a valid synchronization marker */
+#define DCF1_IS_START(dt)	(dt.tv_sec >= 1 && dt.tv_nsec >= 800000000)
 
 #define dcf1dbg	printf
 
