@@ -14,17 +14,25 @@ if RADIO_DCF1
 config DEBUG_DCF1_MEASUREMENT
 	bool "Enable debug output for measurement stage"
 	default n
+	---help---
+		Display measured time between level transitions on DATA pin.
 
 config DEBUG_DCF1_DECODE
 	bool "Enable debug output for decoding stage"
 	default n
+	---help---
+		Display the calculation of bits from time delta
 
 config DEBUG_DCF1_RECEIVE
 	bool "Enable debug output for reception stage"
 	default n
+	---help---
+		Display contents of receive buffer
 
 config DEBUG_DCF1_SYNC
 	bool "Enable debug output for synchronization stage"
 	default n
+	---help---
+		Display synchonization process information
 
 endif
