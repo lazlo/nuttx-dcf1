@@ -562,7 +562,7 @@ static void dcf1_synchonize(void)
 		dcf1dbg_sy("dcf1 SY ?  ");
 	}
 
-	dcf1dbg_sy(" (dt %ld ms)\n", (dev.tid.tv_sec * 1000) + (dev.tid.tv_nsec / 1000000));
+	dcf1dbg_sy(" (dt %4d ms)\n", (dev.tid.tv_sec * 1000) + (dev.tid.tv_nsec / 1000000));
 
 	/* Save current time as last for next measurement */
 	memcpy(&dev.ti_last, &dev.ti, sizeof(dev.ti));
