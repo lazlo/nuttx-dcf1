@@ -600,6 +600,10 @@ static int dcf1_procirq(int argc, char *argv[])
 
 				/* Display contents of receive buffer (for development)
 				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
+				/* TODO This is problematic since we do not specify if to show
+				 * the first or the last 60 bits (little or big endian with respect
+				 * to the direction the bits are shifted in!).
+				 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
 				dcf1_rxbuf_show(60, 20);
 
 				dcf1_synchonize();
