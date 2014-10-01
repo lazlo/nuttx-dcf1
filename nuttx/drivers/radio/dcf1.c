@@ -573,7 +573,7 @@ static int dcf1_procirq(int argc, char *argv[])
 {
 	long delta_msec = 0;
 	char bit;
-#
+
 	while (1)
 	{
 		/* Wait for interrupt to occur */
