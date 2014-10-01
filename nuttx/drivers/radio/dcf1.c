@@ -443,74 +443,83 @@ static bool dcf77valid(struct dcf77msg m)
 
 static void dcf77dump(struct dcf77msg m)
 {
-	int minute = 0;
-	int hour = 0;
-	int day = 0;
-	int weekday = 0;
-	int month = 0;
-	int year = 0;
+	struct datatime {
+		int minute;
+		int hour;
+		int day;
+		int weekday;
+		int month;
+		int year;
+	} i = {
+		.minute = 0,
+		.hour = 0,
+		.day = 0,
+		.weekday = 0,
+		.month = 0,
+		.year = 0,
+	};
 
-	minute += m.m1 ? 1 : 0;
-	minute += m.m2 ? 2 : 0;
-	minute += m.m4 ? 4 : 0;
-	minute += m.m8 ? 8 : 0;
-	minute += m.m10 ? 10 : 0;
-	minute += m.m20 ? 20 : 0;
-	minute += m.m40 ? 40 : 0;
+	i.minute += m.m1 ? 1 : 0;
+	i.minute += m.m2 ? 2 : 0;
+	i.minute += m.m4 ? 4 : 0;
+	i.minute += m.m8 ? 8 : 0;
+	i.minute += m.m10 ? 10 : 0;
+	i.minute += m.m20 ? 20 : 0;
+	i.minute += m.m40 ? 40 : 0;
 
 	/* TODO parity for minute */
 
-	hour += m.h1 ? 1 : 0;
-	hour += m.h2 ? 2 : 0;
-	hour += m.h4 ? 4 : 0;
-	hour += m.h8 ? 8 : 0;
-	hour += m.h10 ? 10 : 0;
-	hour += m.h20 ? 20 : 0;
+	i.hour += m.h1 ? 1 : 0;
+	i.hour += m.h2 ? 2 : 0;
+	i.hour += m.h4 ? 4 : 0;
+	i.hour += m.h8 ? 8 : 0;
+	i.hour += m.h10 ? 10 : 0;
+	i.hour += m.h20 ? 20 : 0;
 
 	/* TODO partity for hour */
 
-	day += m.dm1 ? 1 : 0;
-	day += m.dm2 ? 2 : 0;
-	day += m.dm4 ? 4 : 0;
-	day += m.dm8 ? 8 : 0;
-	day += m.dm10 ? 10 : 0;
-	day += m.dm20 ? 20 : 0;
+	i.day += m.dm1 ? 1 : 0;
+	i.day += m.dm2 ? 2 : 0;
+	i.day += m.dm4 ? 4 : 0;
+	i.day += m.dm8 ? 8 : 0;
+	i.day += m.dm10 ? 10 : 0;
+	i.day += m.dm20 ? 20 : 0;
 
-	weekday += m.dw1 ? 1 : 0;
-	weekday += m.dw2 ? 2 : 0;
-	weekday += m.dw4 ? 4 : 0;
+	i.weekday += m.dw1 ? 1 : 0;
+	i.weekday += m.dw2 ? 2 : 0;
+	i.weekday += m.dw4 ? 4 : 0;
 
-	month += m.mn1 ? 1 : 0;
-	month += m.mn2 ? 2 : 0;
-	month += m.mn4 ? 4 : 0;
-	month += m.mn8 ? 8 : 0;
-	month += m.mn10 ? 10 : 0;
+	i.month += m.mn1 ? 1 : 0;
+	i.month += m.mn2 ? 2 : 0;
+	i.month += m.mn4 ? 4 : 0;
+	i.month += m.mn8 ? 8 : 0;
+	i.month += m.mn10 ? 10 : 0;
 
-	year += m.y1 ? 1 : 0;
-	year += m.y2 ? 2 : 0;
-	year += m.y4 ? 4 : 0;
-	year += m.y8 ? 8 : 0;
-	year += m.y10 ? 10 : 0;
-	year += m.y20 ? 20 : 0;
-	year += m.y40 ? 40 : 0;
-	year += m.y80 ? 80 : 0;
+	i.year += m.y1 ? 1 : 0;
+	i.year += m.y2 ? 2 : 0;
+	i.year += m.y4 ? 4 : 0;
+	i.year += m.y8 ? 8 : 0;
+	i.year += m.y10 ? 10 : 0;
+	i.year += m.y20 ? 20 : 0;
+	i.year += m.y40 ? 40 : 0;
+	i.year += m.y80 ? 80 : 0;
 
 	/* TODO Check parity bit 58 for bits 36 to 58 */
 
 	printf("\n");
 #if 1
 	printf("DCF77 Message: %4d-%02d-%02d (%d) %02d:%02d\n",
-		year + 2000, month, day,
-		weekday,
-		hour, minute);
+		i.year + 2000, i.month, i.day,
+		i.weekday,
+		i.hour, i.minute);
 #else
-	printf("  Year:    %2d\n", year);
-	printf("  Month:   %2d\n", month);
-	printf("  Day:     %2d\n", day);
-	printf("  Weekday:  %d\n", weekday);
+	printf("  Year:    %2d\n", i.year);
+	printf("  Month:   %2d\n", i.month);
+	printf("  Day:     %2d\n", i.day);
+	printf("  Weekday:  %d\n", i.weekday);
 	printf("\n");
-	printf("  Minute:  %2d\n", minute);
-	printf("  Hour:    %2d\n", hour);
+	printf("  Minute:  %2d\n", i.minute);
+	printf("  Hour:    %2d\n", i.hour);
 #endif
 	printf("\n");
 }
