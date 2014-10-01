@@ -505,20 +505,10 @@ static void dcf77dump(struct dcf77msg m)
 	/* TODO Check parity bit 58 for bits 36 to 58 */
 
 	printf("\n");
-#if 1
 	printf("DCF77 Message: %4d-%02d-%02d (%d) %02d:%02d\n",
 		i.year + 2000, i.month, i.day,
 		i.weekday,
 		i.hour, i.minute);
-#else
-	printf("  Year:    %2d\n", i.year);
-	printf("  Month:   %2d\n", i.month);
-	printf("  Day:     %2d\n", i.day);
-	printf("  Weekday:  %d\n", i.weekday);
-	printf("\n");
-	printf("  Minute:  %2d\n", i.minute);
-	printf("  Hour:    %2d\n", i.hour);
-#endif
 	printf("\n");
 }
 
