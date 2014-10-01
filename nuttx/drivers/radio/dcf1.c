@@ -148,7 +148,7 @@ static void	dcf1_rxbuf_append(const bool bit);
 
 /* Receive Buffer Synchonization */
 
-static void dcf1_synchonize(void);
+static bool dcf1_synchonize(void);
 
 /* Device File System Interface */
 
@@ -524,8 +524,10 @@ static void dcf77dump(struct dcf77msg m)
 	printf("\n");
 }
 
-static void dcf1_synchonize(void)
+static bool dcf1_synchonize(void)
 {
+	bool rc = false;
+
 	/* Save time to calculate delta between two received bits */
 	dcf1_getreftime(&dev.ti);
 
@@ -533,43 +535,21 @@ static void dcf1_synchonize(void)
 	 * the delta between this and the last valid bit received. */
 	dcf1_timespec_sub(dev.ti, dev.ti_last, &dev.tid);
 
-	if (DCF1_IS_START(dev.tid))
-	{
-		dcf1dbg_sy("dcf1 SY found start ");
-		/* TODO Reset the current bit position counter to ... 0? */
-
-
-		/* When shifting right, we right padd the
-		 * receive buffer by 4 bits */
-		dcf1_rxbuf_append(0);
-		dcf1_rxbuf_append(0);
-		dcf1_rxbuf_append(0);
-		dcf1_rxbuf_append(0);
-
-		/* TODO Replace with call to dcf1_rxbuf_get() */
-		struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
-
-		if (dcf77valid(*m))
-		{
-			dcf77dump(*m);
-		}
-		else
-		{
-			dcf1dbg("dcf1 DCF77 msg invalid\n");
-		}
-
-		/* Empty the receive buffer */
-		dcf1_rxbuf_reset();
-	}
-	else
+	if (!DCF1_IS_START(dev.tid))
 	{
 		dcf1dbg_sy("dcf1 SY ?  ");
+		goto out;
 	}
+	dcf1dbg_sy("dcf1 SY found start ");
+	rc = true;
 
+out:
 	dcf1dbg_sy(" (dt %4d ms)\n", (dev.tid.tv_sec * 1000) + (dev.tid.tv_nsec / 1000000));
 
 	/* Save current time as last for next measurement */
 	memcpy(&dev.ti_last, &dev.ti, sizeof(dev.ti));
+
+	return rc;
 }
 
 /* Process data
@@ -621,7 +601,32 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
 				dcf1_rxbuf_show(60, 20);
 
-				dcf1_synchonize();
+				if (dcf1_synchonize())
+				{
+					/* TODO Reset the current bit position counter to ... 0? */
+
+					/* When shifting right, we right padd the
+					 * receive buffer by 4 bits */
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+					dcf1_rxbuf_append(0);
+
+					/* TODO Replace with call to dcf1_rxbuf_get() */
+					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+
+					if (dcf77valid(*m))
+					{
+						dcf77dump(*m);
+					}
+					else
+					{
+						dcf1dbg("dcf1 DCF77 msg invalid\n");
+					}
+
+					/* Empty the receive buffer */
+					dcf1_rxbuf_reset();
+				}
 			}
 
 			delta_msec = 0;
