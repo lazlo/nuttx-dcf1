@@ -533,15 +533,17 @@ static bool dcf1_synchonize(void)
 	 * the delta between this and the last valid bit received. */
 	dcf1_timespec_sub(dev.ti, dev.ti_last, &dev.tid);
 
-	if (!DCF1_IS_START(dev.tid))
+	dcf1dbg_sy("dcf1 SY ");
+	if (DCF1_IS_START(dev.tid))
 	{
-		dcf1dbg_sy("dcf1 SY ?  ");
-		goto out;
+		dcf1dbg_sy("found start ");
+		rc = true;
 	}
-	dcf1dbg_sy("dcf1 SY found start ");
-	rc = true;
+	else
+	{
+		dcf1dbg_sy("?  ");
+	}
 
-out:
 	dcf1dbg_sy(" (dt %4d ms)\n", (dev.tid.tv_sec * 1000) + (dev.tid.tv_nsec / 1000000));
 
 	/* Save current time as last for next measurement */
