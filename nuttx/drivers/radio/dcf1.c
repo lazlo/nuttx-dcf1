@@ -53,21 +53,6 @@
 #  error "CLOCK_MONOTONIC=y needs to be set in .config"
 #endif
 
-/* Measure time between DATA pin level transitions */
-#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
-#  define DEBUG_DCF1_MEASURE
-#endif
-
-/* Calculate bits from time delta */
-#ifdef CONFIG_DEBUG_DCF1_DECODE
-#  define DEBUG_DCF1_DECODE
-#endif
-
-/* Display contents of receive buffer */
-#ifdef CONFIG_DEBUG_DCF1_RECEIVE
-#  define DEBUG_DCF1_RXBUF
-#endif
-
 /* Configuration *******************************************************/
 
 /* Device path to be used for the driver */
@@ -112,22 +97,22 @@
 
 #define dcf1dbg	printf
 
-#ifdef DEBUG_DCF1_MEASURE
+#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
 # 	define dcf1dbg_me	dcf1dbg
 #else
 #	define dcf1dbg_me(x...)
 #endif
-#ifdef DEBUG_DCF1_DECODE
+#ifdef CONFIG_DEBUG_DCF1_DECODE
 #	define dcf1dbg_de	dcf1dbg
 #else
 #	define dcf1dbg_de(x...)
 #endif
-#ifdef DEBUG_DCF1_RXBUF
+#ifdef CONFIG_DEBUG_DCF1_RECEIVE
 #	define dcf1dbg_rx	dcf1dbg
 #else
 #	define dcf1dbg_rx(x...)
 #endif
-#ifdef DEBUG_DCF1_SYNC
+#ifdef CONFIG_DEBUG_DCF1_SYNC
 #	define dcf1dbg_sy	dcf1dbg
 #else
 #	define dcf1dbg_sy(x...)
