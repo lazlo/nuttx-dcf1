@@ -18,8 +18,6 @@
 
 /* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
 
-/* http://www.mikrocontroller.net/topic/248487 -- DCF77 Datagram Synchronization */
-
 /***********************************************************************/
 /* Includes                                                            */
 /***********************************************************************/
