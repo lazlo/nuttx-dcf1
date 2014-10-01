@@ -140,6 +140,10 @@ static void	dcf1_getreftime(struct timespec *t);
 static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 static void	dcf1_rxbuf_append(const bool bit);
 
+/* Receive Buffer Synchonization */
+
+static void dcf1_synchonize(void);
+
 /* Device File System Interface */
 
 static int	dcf1_open(file_t *filep);
@@ -176,6 +180,12 @@ static struct dcf1_dev {
 	struct timespec dt;
 
 	uint64_t	rxbuf;
+
+	/* Receive Buffer Synchonization */
+
+	struct timespec ti_last;
+	struct timespec ti;
+	struct timespec tid;
 } dev;
 
 /***********************************************************************/
@@ -494,6 +504,54 @@ static void dcf77dump(struct dcf77msg m)
 	printf("\n");
 }
 
+static void dcf1_synchonize(void)
+{
+	/* Save time to calculate delta between two received bits */
+	dcf1_getreftime(&dev.ti);
+
+	/* Now that we have decoded a valid bit, we shall calculate
+	 * the delta between this and the last valid bit received. */
+	dcf1_timespec_sub(dev.ti, dev.ti_last, &dev.tid);
+
+	if (DCF1_IS_START(dev.tid))
+	{
+		dcf1dbg_sy("dcf1 SY found start ");
+		/* TODO Reset the current bit position counter to ... 0? */
+
+
+		/* When shifting right, we right padd the
+		 * receive buffer by 4 bits */
+		dcf1_rxbuf_append(0);
+		dcf1_rxbuf_append(0);
+		dcf1_rxbuf_append(0);
+		dcf1_rxbuf_append(0);
+
+		/* TODO Replace with call to dcf1_rxbuf_get() */
+		struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+
+		if (dcf77valid(*m))
+		{
+			dcf77dump(*m);
+		}
+		else
+		{
+			dcf1dbg("dcf1 DCF77 msg invalid\n");
+		}
+
+		/* TODO Replaced with call to dcf1_rxbuf_reset() */
+		dev.rxbuf = 0;
+	}
+	else
+	{
+		dcf1dbg_sy("dcf1 SY ?  ");
+	}
+
+	dcf1dbg_sy(" (dt %ld ms)\n", (dev.tid.tv_sec * 1000) + (dev.tid.tv_nsec / 1000000));
+
+	/* Save current time as last for next measurement */
+	memcpy(&dev.ti_last, &dev.ti, sizeof(dev.ti));
+}
+
 /* Process data
  *
  * TODO Measure time between last and current interrupt that
@@ -510,12 +568,7 @@ static int dcf1_procirq(int argc, char *argv[])
 {
 	long delta_msec = 0;
 	char bit;
-#if 1
-	struct timespec ti_last;
-	struct timespec ti;
-	struct timespec tid;
-#endif
-
+#
 	while (1)
 	{
 		/* Wait for interrupt to occur */
@@ -544,50 +597,7 @@ static int dcf1_procirq(int argc, char *argv[])
 				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
 				dcf1_rxbuf_show(60, 20);
 
-#if 1
-				/* Save time to calculate delta between two received bits */
-				dcf1_getreftime(&ti);
-
-				/* Now that we have decoded a valid bit, we shall calculate
-				 * the delta between this and the last valid bit received. */
-				dcf1_timespec_sub(ti, ti_last, &tid);
-
-				if (DCF1_IS_START(tid))
-				{
-					dcf1dbg_sy("dcf1 SY found start ");
-					/* TODO Reset the current bit position counter to ... 0? */
-
-
-					/* When shifting right, we right padd the
-					 * receive buffer by 4 bits */
-					dcf1_rxbuf_append(0);
-					dcf1_rxbuf_append(0);
-					dcf1_rxbuf_append(0);
-					dcf1_rxbuf_append(0);
-
-					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
-
-					if (dcf77valid(*m))
-					{
-						dcf77dump(*m);
-					}
-					else
-					{
-						dcf1dbg("dcf1 DCF77 msg invalid\n");
-					}
-
-					dev.rxbuf = 0;
-				}
-				else
-				{
-					dcf1dbg_sy("dcf1 SY ?  ");
-				}
-
-				dcf1dbg_sy(" (dt %ld ms)\n", (tid.tv_sec * 1000) + (tid.tv_nsec / 1000000));
-
-				/* Save current time as last for next measurement */
-				memcpy(&ti_last, &ti, sizeof(ti));
-#endif
+				dcf1_synchonize();
 			}
 
 			delta_msec = 0;
