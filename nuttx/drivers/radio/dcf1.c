@@ -306,7 +306,7 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 	dcf1dbg_rx("dcf1 rxbuf ");
 	for (i = rxbuflen; i > 0; i--)
 	{
-		dcf1dbg_rx("%d", (dev.rxbuf & ((uint64_t)1 << i)) ? 1 : 0);
+		dcf1dbg_rx("%c", (dev.rxbuf & ((uint64_t)1 << i)) ? '1' : '0');
 		if (((1+i) % split_nbit) == 0)
 			dcf1dbg_rx(" ");
 	}
