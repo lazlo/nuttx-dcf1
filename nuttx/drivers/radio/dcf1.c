@@ -141,8 +141,8 @@ static void	dcf1_getreftime(struct timespec *t);
 /* Receive Buffer Management */
 
 static void	dcf1_rxbuf_reset(void);
-static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 static void	dcf1_rxbuf_append(const bool bit);
+static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 
 /* Receive Buffer Synchonization */
 
@@ -299,20 +299,6 @@ static void dcf1_rxbuf_reset(void)
 		dev.rxbuf = 0;
 }
 
-static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
-{
-	unsigned short i;
-
-	dcf1dbg_rx("dcf1 rxbuf ");
-	for (i = rxbuflen; i > 0; i--)
-	{
-		dcf1dbg_rx("%c", (dev.rxbuf & ((uint64_t)1 << i)) ? '1' : '0');
-		if (((1+i) % split_nbit) == 0)
-			dcf1dbg_rx(" ");
-	}
-	dcf1dbg_rx("\n");
-}
-
 static void dcf1_rxbuf_append(const bool bit)
 {
 #define APPEND_RIGHTSHIFT
@@ -334,6 +320,20 @@ static void dcf1_rxbuf_append(const bool bit)
 
 	if (bit)
 		append_bit(dev.rxbuf);
+}
+
+static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit)
+{
+	unsigned short i;
+
+	dcf1dbg_rx("dcf1 rxbuf ");
+	for (i = rxbuflen; i > 0; i--)
+	{
+		dcf1dbg_rx("%c", (dev.rxbuf & ((uint64_t)1 << i)) ? '1' : '0');
+		if (((1+i) % split_nbit) == 0)
+			dcf1dbg_rx(" ");
+	}
+	dcf1dbg_rx("\n");
 }
 
 /* Signal Processing ***************************************************/
@@ -421,13 +421,6 @@ static char dcf1_decode(const long delta_msec)
 	return bit;
 }
 
-/* Handles interrupt */
-static int dcf1_interrupt(int irq, void *context)
-{
-	sem_post(&dev.isr_sem);
-	return OK;
-}
-
 static bool dcf1_synchonize(void)
 {
 	bool rc = false;
@@ -457,6 +450,13 @@ static bool dcf1_synchonize(void)
 	memcpy(&dev.ti_last, &dev.ti, sizeof(dev.ti));
 
 	return rc;
+}
+
+/* Handles interrupt */
+static int dcf1_interrupt(int irq, void *context)
+{
+	sem_post(&dev.isr_sem);
+	return OK;
 }
 
 /* Process data
