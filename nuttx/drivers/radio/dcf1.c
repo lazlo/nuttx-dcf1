@@ -95,7 +95,7 @@
 #define DCF1_IS_DATA_0(dt)	(dt >= DCF1_DATA_0_MIN_MS && dt <= DCF1_DATA_0_MAX_MS)
 #define DCF1_IS_DATA_1(dt)	(dt >= DCF1_DATA_1_MIN_MS && dt <= DCF1_DATA_1_MAX_MS)
 
-#define TS_TO_MS(ts)		((ts.tv_sec * 1000) + (ts.tv_nsec / 1000000))
+#define TS_TO_MS(ts)		((ts.tv_sec * MSEC_PER_SEC) + (ts.tv_nsec / USEC_PER_SEC))
 
 #define DCF1_IS_START(dt)	(TS_TO_MS(dt) >= DCF1_SYNC_MARK_MIN_MS && TS_TO_MS(dt) <= DCF1_SYNC_MARK_MAX_MS)
 
@@ -451,7 +451,7 @@ static bool dcf1_synchonize(void)
 		dcf1dbg_sy("?  ");
 	}
 
-	dcf1dbg_sy(" (dt %4d ms)\n", (dev.tid.tv_sec * 1000) + (dev.tid.tv_nsec / 1000000));
+	dcf1dbg_sy(" (dt %4d ms)\n", TS_TO_MS(dev.tid));
 
 	/* Save current time as last for next measurement */
 	memcpy(&dev.ti_last, &dev.ti, sizeof(dev.ti));
