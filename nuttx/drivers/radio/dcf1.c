@@ -428,34 +428,6 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
-static void dcf77dump(struct dcf77msg m)
-{
-	struct datatime {
-		int minute;
-		int hour;
-		int day;
-		int weekday;
-		int month;
-		int year;
-	} i = {
-		.minute		= dcf77msg_minute(m),
-		.hour		= dcf77msg_hour(m),
-		.day		= dcf77msg_day(m),
-		.weekday	= dcf77msg_weekday(m),
-		.month		= dcf77msg_month(m),
-		.year		= dcf77msg_year(m),
-	};
-
-	/* TODO Check parity bit 58 for bits 36 to 58 */
-
-	printf("\n");
-	printf("DCF77 Message: %4d-%02d-%02d (%d) %02d:%02d\n",
-		i.year + 2000, i.month, i.day,
-		i.weekday,
-		i.hour, i.minute);
-	printf("\n");
-}
-
 static bool dcf1_synchonize(void)
 {
 	bool rc = false;
@@ -552,7 +524,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 					if (dcf77msg_valid(*m))
 					{
-						dcf77dump(*m);
+						dcf77msg_dump(*m);
 					}
 					else
 					{
