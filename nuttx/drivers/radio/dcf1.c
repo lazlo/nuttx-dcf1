@@ -148,6 +148,17 @@ static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 
 static bool dcf1_synchonize(void);
 
+/* Signal Processing */
+
+static long	dcf1_measure(void);
+static char	dcf1_decode(const long delta_msec);
+static bool	dcf1_synchonize(void);
+
+/* Interrupt Handling */
+
+static int	dcf1_interrupt(int irq, void *context);
+static int	dcf1_procirq(int argc, char *argv[]);
+
 /* Device File System Interface */
 
 static int	dcf1_open(file_t *filep);
