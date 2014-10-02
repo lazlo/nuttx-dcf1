@@ -428,17 +428,6 @@ static int dcf1_interrupt(int irq, void *context)
 	return OK;
 }
 
-/* Checks for the respective bits that make a valid DCF77 message */
-static bool dcf77valid(struct dcf77msg m)
-{
-	bool valid = false;
-
-	if (m.start_time == 1)
-		valid = true;
-
-	return valid;
-}
-
 static void dcf77dump(struct dcf77msg m)
 {
 	struct datatime {
@@ -561,7 +550,7 @@ static int dcf1_procirq(int argc, char *argv[])
 					/* TODO Replace with call to dcf1_rxbuf_get() */
 					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
 
-					if (dcf77valid(*m))
+					if (dcf77msg_valid(*m))
 					{
 						dcf77dump(*m);
 					}

@@ -104,6 +104,17 @@ struct dcf77msg
   uint64_t pad          : 4; /* 60:64 */
 };
 
+/* Checks for the respective bits that make a valid DCF77 message */
+inline bool dcf77msg_valid(const struct dcf77msg m)
+{
+	bool valid = false;
+
+	if (m.start_time == 1)
+		valid = true;
+
+	return valid;
+}
+
 inline int dcf77msg_minute(const struct dcf77msg m)
 {
 	int minute = 0;
