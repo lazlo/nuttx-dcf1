@@ -449,58 +449,13 @@ static void dcf77dump(struct dcf77msg m)
 		int month;
 		int year;
 	} i = {
-		.minute = 0,
-		.hour = 0,
-		.day = 0,
-		.weekday = 0,
-		.month = 0,
-		.year = 0,
+		.minute		= dcf77msg_minute(m),
+		.hour		= dcf77msg_hour(m),
+		.day		= dcf77msg_day(m),
+		.weekday	= dcf77msg_weekday(m),
+		.month		= dcf77msg_month(m),
+		.year		= dcf77msg_year(m),
 	};
-
-	i.minute += m.m1 ? 1 : 0;
-	i.minute += m.m2 ? 2 : 0;
-	i.minute += m.m4 ? 4 : 0;
-	i.minute += m.m8 ? 8 : 0;
-	i.minute += m.m10 ? 10 : 0;
-	i.minute += m.m20 ? 20 : 0;
-	i.minute += m.m40 ? 40 : 0;
-
-	/* TODO parity for minute */
-
-	i.hour += m.h1 ? 1 : 0;
-	i.hour += m.h2 ? 2 : 0;
-	i.hour += m.h4 ? 4 : 0;
-	i.hour += m.h8 ? 8 : 0;
-	i.hour += m.h10 ? 10 : 0;
-	i.hour += m.h20 ? 20 : 0;
-
-	/* TODO partity for hour */
-
-	i.day += m.dm1 ? 1 : 0;
-	i.day += m.dm2 ? 2 : 0;
-	i.day += m.dm4 ? 4 : 0;
-	i.day += m.dm8 ? 8 : 0;
-	i.day += m.dm10 ? 10 : 0;
-	i.day += m.dm20 ? 20 : 0;
-
-	i.weekday += m.dw1 ? 1 : 0;
-	i.weekday += m.dw2 ? 2 : 0;
-	i.weekday += m.dw4 ? 4 : 0;
-
-	i.month += m.mn1 ? 1 : 0;
-	i.month += m.mn2 ? 2 : 0;
-	i.month += m.mn4 ? 4 : 0;
-	i.month += m.mn8 ? 8 : 0;
-	i.month += m.mn10 ? 10 : 0;
-
-	i.year += m.y1 ? 1 : 0;
-	i.year += m.y2 ? 2 : 0;
-	i.year += m.y4 ? 4 : 0;
-	i.year += m.y8 ? 8 : 0;
-	i.year += m.y10 ? 10 : 0;
-	i.year += m.y20 ? 20 : 0;
-	i.year += m.y40 ? 40 : 0;
-	i.year += m.y80 ? 80 : 0;
 
 	/* TODO Check parity bit 58 for bits 36 to 58 */
 

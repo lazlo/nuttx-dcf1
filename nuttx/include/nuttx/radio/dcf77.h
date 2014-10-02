@@ -103,3 +103,90 @@ struct dcf77msg
 
   uint64_t pad          : 4; /* 60:64 */
 };
+
+inline int dcf77msg_minute(const struct dcf77msg m)
+{
+	int minute = 0;
+
+	minute += m.m1 ? 1 : 0;
+	minute += m.m2 ? 2 : 0;
+	minute += m.m4 ? 4 : 0;
+	minute += m.m8 ? 8 : 0;
+	minute += m.m10 ? 10 : 0;
+	minute += m.m20 ? 20 : 0;
+	minute += m.m40 ? 40 : 0;
+
+	/* TODO parity for minute */
+
+	return minute;
+}
+
+inline int dcf77msg_hour(const struct dcf77msg m)
+{
+	int hour = 0;
+
+	hour += m.h1 ? 1 : 0;
+	hour += m.h2 ? 2 : 0;
+	hour += m.h4 ? 4 : 0;
+	hour += m.h8 ? 8 : 0;
+	hour += m.h10 ? 10 : 0;
+	hour += m.h20 ? 20 : 0;
+
+	/* TODO partity for hour */
+
+	return hour;
+}
+
+inline int dcf77msg_day(const struct dcf77msg m)
+{
+	int day = 0;
+
+	day += m.dm1 ? 1 : 0;
+	day += m.dm2 ? 2 : 0;
+	day += m.dm4 ? 4 : 0;
+	day += m.dm8 ? 8 : 0;
+	day += m.dm10 ? 10 : 0;
+	day += m.dm20 ? 20 : 0;
+
+	return day;
+}
+
+inline int dcf77msg_weekday(const struct dcf77msg m)
+{
+	int weekday = 0;
+
+	weekday += m.dw1 ? 1 : 0;
+	weekday += m.dw2 ? 2 : 0;
+	weekday += m.dw4 ? 4 : 0;
+
+	return weekday;
+}
+
+inline int dcf77msg_month(const struct dcf77msg m)
+{
+	int month = 0;
+
+	month += m.mn1 ? 1 : 0;
+	month += m.mn2 ? 2 : 0;
+	month += m.mn4 ? 4 : 0;
+	month += m.mn8 ? 8 : 0;
+	month += m.mn10 ? 10 : 0;
+
+	return month;
+}
+
+inline int dcf77msg_year(const struct dcf77msg m)
+{
+	int year = 0;
+
+	year += m.y1 ? 1 : 0;
+	year += m.y2 ? 2 : 0;
+	year += m.y4 ? 4 : 0;
+	year += m.y8 ? 8 : 0;
+	year += m.y10 ? 10 : 0;
+	year += m.y20 ? 20 : 0;
+	year += m.y40 ? 40 : 0;
+	year += m.y80 ? 80 : 0;
+
+	return year;
+}
