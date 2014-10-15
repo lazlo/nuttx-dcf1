@@ -497,13 +497,12 @@ static int dcf1_procirq(int argc, char *argv[])
 		 */
 
 		delta_msec = dcf1_measure();
-
-		/*
-		 * Decode duration into bits
-		 */
-
 		if (delta_msec)
 		{
+			/*
+			 * Decode duration into bits
+			 */
+
 			bit = dcf1_decode(delta_msec);
 
 			/* Only modify receive buffer on successful decoding */
