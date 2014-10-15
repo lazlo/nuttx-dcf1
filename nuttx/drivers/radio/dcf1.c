@@ -506,46 +506,49 @@ static int dcf1_procirq(int argc, char *argv[])
 			bit = dcf1_decode(delta_msec);
 
 			/* Only modify receive buffer on successful decoding */
-			if (bit != -1)
+			if (bit == -1)
 			{
-				dcf1_rxbuf_append(bit);
-
-				/* Display contents of receive buffer (for development)
-				 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
-				/* TODO This is problematic since we do not specify if to show
-				 * the first or the last 60 bits (little or big endian with respect
-				 * to the direction the bits are shifted in!).
-				 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
-				dcf1_rxbuf_show(60, 20);
-
-				if (dcf1_synchonize())
-				{
-					/* TODO Reset the current bit position counter to ... 0? */
-
-					/* When shifting right, we right padd the
-					 * receive buffer by 4 bits */
-					dcf1_rxbuf_append(0);
-					dcf1_rxbuf_append(0);
-					dcf1_rxbuf_append(0);
-					dcf1_rxbuf_append(0);
-
-					/* TODO Replace with call to dcf1_rxbuf_get() */
-					struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
-
-					if (dcf77msg_valid(*m))
-					{
-						dcf77msg_dump(*m);
-					}
-					else
-					{
-						dcf1dbg("dcf1 DCF77 msg invalid\n");
-					}
-
-					/* Empty the receive buffer */
-					dcf1_rxbuf_reset();
-				}
+				goto next;
 			}
 
+			dcf1_rxbuf_append(bit);
+
+			/* Display contents of receive buffer (for development)
+			 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
+			/* TODO This is problematic since we do not specify if to show
+			 * the first or the last 60 bits (little or big endian with respect
+			 * to the direction the bits are shifted in!).
+			 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
+			dcf1_rxbuf_show(60, 20);
+
+			if (dcf1_synchonize())
+			{
+				/* TODO Reset the current bit position counter to ... 0? */
+
+				/* When shifting right, we right padd the
+				 * receive buffer by 4 bits */
+				dcf1_rxbuf_append(0);
+				dcf1_rxbuf_append(0);
+				dcf1_rxbuf_append(0);
+				dcf1_rxbuf_append(0);
+
+				/* TODO Replace with call to dcf1_rxbuf_get() */
+				struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+
+				if (dcf77msg_valid(*m))
+				{
+					dcf77msg_dump(*m);
+				}
+				else
+				{
+					dcf1dbg("dcf1 DCF77 msg invalid\n");
+				}
+
+				/* Empty the receive buffer */
+				dcf1_rxbuf_reset();
+			}
+
+next:
 			delta_msec = 0;
 			memset(&dev.dt, 0, sizeof(dev.dt));
 		}
