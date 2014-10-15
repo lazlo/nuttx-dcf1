@@ -165,6 +165,7 @@ static int	dcf1_open(file_t *filep);
 static int	dcf1_close(file_t *filep);
 static ssize_t	dcf1_read(file_t *filep, FAR char *buf, size_t buflen);
 static ssize_t	dcf1_write(file_t *filep, FAR const char *buf, size_t buflen);
+static int	dcf1_ioctl(file_t *filep, int cmd, unsigned long arg);
 
 static const struct file_operations dcf1_ops = {
 	dcf1_open,	/* open */
@@ -172,7 +173,7 @@ static const struct file_operations dcf1_ops = {
 	dcf1_read,	/* read */
 	dcf1_write,	/* write */
 	0,		/* seek */
-	0,		/* ioctl */
+	dcf1_ioctl,	/* ioctl */
 };
 
 static struct dcf1_dev {
@@ -594,6 +595,11 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 	/* TODO Write might be used to turn the receiver on or off
 	 * using the PON pin. */
 
+	return OK;
+}
+
+static int dcf1_ioctl(file_t *filep, int cmd, unsigned long arg)
+{
 	return OK;
 }
 
