@@ -507,9 +507,7 @@ static int dcf1_procirq(int argc, char *argv[])
 
 			/* Only modify receive buffer on successful decoding */
 			if (bit == -1)
-			{
 				goto next;
-			}
 
 			dcf1_rxbuf_append(bit);
 
