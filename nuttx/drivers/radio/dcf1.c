@@ -42,13 +42,13 @@
  * Pre-processor Definitions
  ***********************************************************************/
 
-#ifndef CONFIG_NSH_ARCHINIT
-#  error "CONFIG_NSH_ARCHINIT is not defined"
-#endif
-
 /* TODO Better check for CLOCK_MONOTONIC symbol ifself. */
 #ifndef CONFIG_CLOCK_MONOTONIC
 #  error "CLOCK_MONOTONIC=y needs to be set in .config"
+#endif
+
+#ifndef CONFIG_NSH_ARCHINIT
+#  error "CONFIG_NSH_ARCHINIT is not defined"
 #endif
 
 /* Configuration *******************************************************/
