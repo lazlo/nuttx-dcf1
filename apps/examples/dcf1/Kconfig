@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_DCF1
+	bool "DCF1 example"
+	default n
+	---help---
+		Enable the DCF1 example
+
+if EXAMPLES_DCF1
+
+config EXAMPLES_DCF1_PROGNAME
+	string "Program name"
+	default "DCF1"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+endif
