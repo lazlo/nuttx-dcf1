@@ -600,6 +600,10 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 
 static int dcf1_ioctl(file_t *filep, int cmd, unsigned long arg)
 {
+	/* TODO Turn debugging on/off for each stage */
+	/* TODO Turn on/off */
+	/* TODO Get signal quality */
+	/* TODO Get raw datagram */
 	return OK;
 }
 
