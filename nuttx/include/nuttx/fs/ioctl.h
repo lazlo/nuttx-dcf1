@@ -71,6 +71,7 @@
 #define _WLIOCBASE      (0x1200) /* Wireless modules ioctl commands */
 #define _CFGDIOCBASE    (0x1300) /* Config Data device (app config) ioctl commands */
 #define _TCIOCBASE      (0x1400) /* Timer ioctl commands */
+#define _RFIOCBASE      (0x1500) /* Radio ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -292,6 +293,12 @@
 
 #define _CFGDIOCVALID(c)   (_IOC_TYPE(c)==_CFGDIOCBASE)
 #define _CFGDIOC(nr)         _IOC(_CFGDIOCBASE,nr)
+
+/* Radio driver ioctl definitions *******************************************/
+/* (see nuttx/include/radio/ioctl.h */
+
+#define _RFIOCVALID(c)     (_IOC_TYPE(c)==_RFIOCBASE)
+#define _RFIOC(nr)           _IOC(_RFIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
