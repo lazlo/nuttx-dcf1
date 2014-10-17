@@ -48,8 +48,8 @@
 
 /* Radio control operations */
 
-#define RFIOCS_ONOFF _RFIOC(0x0001) /* Turn (set) on/off state */
-#define RFIOCG_ONOFF _RFIOC(0x0002) /* Read current on/off state */
-#define RFIOCG_STATS _RFIOC(0x0003) /* Read statistics */
+#define RFIOCS_ONOFF _RFIOC(0x0001) /* Set on/off state */
+#define RFIOCG_ONOFF _RFIOC(0x0002) /* Get urrent on/off state */
+#define RFIOCG_STATS _RFIOC(0x0003) /* Get statistics */
 
 #endif /* __INCLUDE_NUTTX_RADIO_IOCTL_H */
