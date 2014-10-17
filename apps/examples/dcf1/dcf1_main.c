@@ -38,7 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
 
 /****************************************************************************
  * Definitions
@@ -62,6 +69,50 @@ int main(int argc, FAR char *argv[])
 int dcf1_main(int argc, char *argv[])
 #endif
 {
-  printf("Usage: %s\n", argv[0]);
-  return 0;
+  bool onoff;
+  int fd;
+  int rv;
+
+  /* Check arguments */
+
+  if (argc != 2)
+    {
+      printf("Usage: %s on|off\n", argv[0]);
+      return 1;
+    }
+
+  /* Parse arguments */
+
+  if (strncmp(argv[1], "on", 2) == 0)
+    {
+      onoff = true;
+    }
+  else if (strncmp(argv[1], "off", 3) == 0)
+    {
+      onoff = false;
+    }
+  else
+    {
+      return 1;
+    }
+
+  /* Perform IO control */
+
+  fd = open("/dev/dcf1", O_RDONLY);
+  if (fd == -1)
+    {
+      printf("ERROR open %d\n", errno);
+    }
+  rv = ioctl(fd, 1, (unsigned long)onoff);
+  if (rv == -1)
+    {
+      printf("ERROR ioctl %d\n", errno);
+    }
+  rv = close(fd);
+  if (rv == -1)
+    {
+      printf("ERROR close %d\n", errno);
+    }
+
+  return rv;
 }
