@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/radio/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -103,7 +104,7 @@ int dcf1_main(int argc, char *argv[])
     {
       printf("ERROR open %d\n", errno);
     }
-  rv = ioctl(fd, 1, (unsigned long)onoff);
+  rv = ioctl(fd, RFIOCS_ONOFF, (unsigned long)onoff);
   if (rv == -1)
     {
       printf("ERROR ioctl %d\n", errno);
