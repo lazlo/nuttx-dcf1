@@ -23,6 +23,7 @@
 /***********************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/radio/ioctl.h>
 
 #include <debug.h>
 #include <time.h>
@@ -600,10 +601,30 @@ static ssize_t dcf1_write(file_t *filep, FAR const char *buf, size_t buflen)
 
 static int dcf1_ioctl(file_t *filep, int cmd, unsigned long arg)
 {
+	enum { DCF1_CMD_ONOFF };
+	struct dcf1_ioctl_args {
+		bool onoff;
+	} *a = (struct dcf1_ioctl_args *)&arg;
+
+	switch (cmd)
+	{
 	/* TODO Turn debugging on/off for each stage */
 	/* TODO Turn on/off */
+	case DCF1_CMD_ONOFF:
+
+		/* -- determin if to turn on or off */
+		/* -- update internal shadow state */
+		/* -- set the PON pin accoding to request */
+		dcf1_enable(a->onoff);
+		break;
+
 	/* TODO Get signal quality */
 	/* TODO Get raw datagram */
+
+	default:
+		return ERROR;
+	}
+
 	return OK;
 }
 
