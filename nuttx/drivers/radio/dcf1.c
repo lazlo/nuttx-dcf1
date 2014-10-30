@@ -469,19 +469,19 @@ static bool dcf1_synchonize(void)
 	 * the delta between this and the last valid bit received. */
 	dcf1_timespec_sub(dev.ti, dev.ti_last, &dev.tid);
 
-	dcf1dbg_sy("dcf1 SY ");
 	if (DCF1_IS_START(dev.tid))
 	{
 		rc = true;
+	}
 
+#ifdef CONFIG_DEBUG_DCF1_SYNC
+	dcf1dbg_sy("dcf1 SY ");
+	if (DCF1_IS_START(dev.tid))
 		dcf1dbg_sy("found start ");
-	}
 	else
-	{
 		dcf1dbg_sy("?  ");
-	}
-
 	dcf1dbg_sy(" (dt %4d ms)\n", TS_TO_MS(dev.tid));
+#endif
 
 	/* Save current time as last for next measurement */
 	memcpy(&dev.ti_last, &dev.ti, sizeof(dev.ti));
