@@ -369,7 +369,6 @@ static long dcf1_measure(void)
 
 	/* Read the current state of data */
 	dev.data_in_state = dcf1_read_data_pin();
-	dcf1dbg_me("dcf1 ME %d", dev.data_in_state);
 
 	/* Make the LED mirror the current data state */
 	dev.led_out_state = dev.data_in_state;
@@ -379,20 +378,27 @@ static long dcf1_measure(void)
 	{
 		/* Save the current time as t1 or t_START */
 		save_t_start();
-
-		dcf1dbg_me(" t_sta = ");
-		putts(dev.t_start);
 	}
 	else if (HIGH2LOW(dev))
 	{
 		/* Save the current time as t2 or t_END */
 		save_t_end();
 
-		dcf1dbg_me(" t_end = ");
-		putts(dev.t_end);
-
 		/* Subtract t2 - t1 and display result */
 		calc_dt();
+	}
+
+#ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
+	dcf1dbg_me("dcf1 ME %d", dev.data_in_state);
+	if (LOW2HIGH(dev))
+	{
+		dcf1dbg_me(" t_sta = ");
+		putts(dev.t_start);
+	}
+	else if (HIGH2LOW(dev))
+	{
+		dcf1dbg_me(" t_end = ");
+		putts(dev.t_end);
 
 		dcf1dbg_me(" (dt ");
 		putts(dev.dt);
@@ -404,6 +410,7 @@ static long dcf1_measure(void)
 		dcf1dbg_me(" err");
 	}
 	dcf1dbg_me("\n");
+#endif
 
 	return dev.dt.tv_nsec / USEC_PER_SEC;
 }
