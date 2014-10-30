@@ -35,6 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 
 #include <nuttx/radio/dcf1.h>
 #include <nuttx/radio/dcf77.h>
@@ -50,6 +51,10 @@
 
 #ifndef CONFIG_NSH_ARCHINIT
 #  error "CONFIG_NSH_ARCHINIT is not defined"
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "CONFIG_SCHED_WORKQUEUE is not defined"
 #endif
 
 /* Configuration *******************************************************/
@@ -157,8 +162,8 @@ static bool	dcf1_synchonize(void);
 
 /* Interrupt Handling */
 
+static void 	dcf1_irqworker(FAR void *arg);
 static int	dcf1_interrupt(int irq, void *context);
-static int	dcf1_procirq(int argc, char *argv[]);
 
 /* Device File System Interface */
 
@@ -187,7 +192,7 @@ static struct dcf1_dev {
 	struct dcf1_lower_s *lower;
 
 	bool		led_out_state;
-	sem_t		isr_sem;
+	struct work_s	irqwork;
 
 	bool		data_in_state;
 	bool		data_in_state_last;
@@ -465,13 +470,6 @@ static bool dcf1_synchonize(void)
 	return rc;
 }
 
-/* Handles interrupt */
-static int dcf1_interrupt(int irq, void *context)
-{
-	sem_post(&dev.isr_sem);
-	return OK;
-}
-
 /* Process data
  *
  * TODO Measure time between last and current interrupt that
@@ -484,79 +482,87 @@ static int dcf1_interrupt(int irq, void *context)
  * 	So if the difference is 1800 ms and the current bit read
  * 	is zero, we have found the beginning of the datagram.
  */
-static int dcf1_procirq(int argc, char *argv[])
+static void dcf1_irqworker(FAR void *arg)
 {
 	long delta_msec = 0;
 	char bit;
 
-	while (1)
-	{
-		/* Wait for interrupt to occur */
-		sem_wait(&dev.isr_sem);
+	/*
+	 * Measure low/high phase duration
+	 */
 
+	delta_msec = dcf1_measure();
+	if (delta_msec)
+	{
 		/*
-		 * Measure low/high phase duration
+		 * Decode duration into bits
 		 */
 
-		delta_msec = dcf1_measure();
-		if (delta_msec)
+		bit = dcf1_decode(delta_msec);
+
+		/* Only modify receive buffer on successful decoding */
+		if (bit == -1)
+			goto next;
+
+		dcf1_rxbuf_append(bit);
+
+		/* Display contents of receive buffer (for development)
+		 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
+		/* TODO This is problematic since we do not specify if to show
+		 * the first or the last 60 bits (little or big endian with respect
+		 * to the direction the bits are shifted in!).
+		 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
+		dcf1_rxbuf_show(60, 20);
+
+		if (dcf1_synchonize())
 		{
-			/*
-			 * Decode duration into bits
-			 */
+			/* TODO Reset the current bit position counter to ... 0? */
 
-			bit = dcf1_decode(delta_msec);
+			/* When shifting right, we right padd the
+			 * receive buffer by 4 bits */
+			dcf1_rxbuf_append(0);
+			dcf1_rxbuf_append(0);
+			dcf1_rxbuf_append(0);
+			dcf1_rxbuf_append(0);
 
-			/* Only modify receive buffer on successful decoding */
-			if (bit == -1)
-				goto next;
+			/* TODO Replace with call to dcf1_rxbuf_get() */
+			struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
 
-			dcf1_rxbuf_append(bit);
-
-			/* Display contents of receive buffer (for development)
-			 * Display 60 bits (from the uint64_t) in groups of 20 bits. */
-			/* TODO This is problematic since we do not specify if to show
-			 * the first or the last 60 bits (little or big endian with respect
-			 * to the direction the bits are shifted in!).
-			 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
-			dcf1_rxbuf_show(60, 20);
-
-			if (dcf1_synchonize())
+			if (dcf77msg_valid(*m))
 			{
-				/* TODO Reset the current bit position counter to ... 0? */
-
-				/* When shifting right, we right padd the
-				 * receive buffer by 4 bits */
-				dcf1_rxbuf_append(0);
-				dcf1_rxbuf_append(0);
-				dcf1_rxbuf_append(0);
-				dcf1_rxbuf_append(0);
-
-				/* TODO Replace with call to dcf1_rxbuf_get() */
-				struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
-
-				if (dcf77msg_valid(*m))
-				{
-					dcf77msg_dump(*m);
-				}
-				else
-				{
-					dcf1dbg("dcf1 DCF77 msg invalid\n");
-				}
-
-				/* Empty the receive buffer */
-				dcf1_rxbuf_reset();
+				dcf77msg_dump(*m);
+			}
+			else
+			{
+				dcf1dbg("dcf1 DCF77 msg invalid\n");
 			}
 
-next:
-			delta_msec = 0;
-			memset(&dev.dt, 0, sizeof(dev.dt));
+			/* Empty the receive buffer */
+			dcf1_rxbuf_reset();
 		}
 
-		/* Prepare for new loop iteration */
-		dev.data_in_state_last = dev.data_in_state;
+next:
+		delta_msec = 0;
+		memset(&dev.dt, 0, sizeof(dev.dt));
 	}
+
+	/* Prepare for new loop iteration */
+	dev.data_in_state_last = dev.data_in_state;
+
+	/* Enable interrupts again */
+	dev.lower->enable(dev.lower);
+
 	return OK;
+}
+
+/* Handles interrupt */
+static int dcf1_interrupt(int irq, void *context)
+{
+	DEBUGASSERT(work_available(&dev.irqwork));
+
+	dev.lower->disable(dev.lower);
+
+	return work_queue(HPWORK, &dev.irqwork, dcf1_irqworker, (FAR void *)&dev, 0);
 }
 
 /* File System Interface ***********************************************/
@@ -647,7 +653,6 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	dev.lower = lower;
 
 	dev.led_out_state = true;
-	sem_init(&dev.isr_sem, 1, 0);
 
 	/* Setup pins */
 	(*dev.pinops->config)(dev.gpio_led);
@@ -656,9 +661,6 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 
 	/* Set default output levels (receiver and LED off by default) */
 	dcf1_enable(false);
-
-	/* Fork a process to wait for interrupts to process */
-	task_create("dcf1", 100, 1024, dcf1_procirq, NULL);
 
 	/* Attach the interrupt to the driver */
 
