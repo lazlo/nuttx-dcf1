@@ -413,22 +413,32 @@ static char dcf1_decode(const long delta_msec)
 {
 	char bit;
 
-	dcf1dbg_de("dcf1 DE ");
-
 	/* Decide if the delta is a binary 1, 0 or error */
 	if (DCF1_IS_DATA_0(delta_msec))
 	{
 		bit = 0;
-		dcf1dbg_de("%d   (dt %3ld ms)", bit, delta_msec);
 	}
 	else if (DCF1_IS_DATA_1(delta_msec))
 	{
 		bit = 1;
-		dcf1dbg_de("%d   (dt %3ld ms)", bit, delta_msec);
 	}
 	else
 	{
 		bit = -1;
+	}
+
+#ifdef CONFIG_DEBUG_DCF1_DECODE
+	dcf1dbg_de("dcf1 DE ");
+	if (DCF1_IS_DATA_0(delta_msec))
+	{
+		dcf1dbg_de("%d   (dt %3ld ms)", bit, delta_msec);
+	}
+	else if (DCF1_IS_DATA_1(delta_msec))
+	{
+		dcf1dbg_de("%d   (dt %3ld ms)", bit, delta_msec);
+	}
+	else
+	{
 		/* TODO Use dcf1_timespec_sub() */
 		dcf1dbg_de("er  (dt %3ld ms) = %ld.%ld-%ld.%ld",
 				delta_msec,
@@ -436,6 +446,8 @@ static char dcf1_decode(const long delta_msec)
 				dev.t_start.tv_sec, (dev.t_start.tv_nsec / USEC_PER_SEC));
 	}
 	dcf1dbg_de("\n");
+#endif
+
 	return bit;
 }
 
