@@ -570,8 +570,6 @@ next:
 
 	/* Enable interrupts again */
 	dev.lower->enable(dev.lower);
-
-	return OK;
 }
 
 /* Handles interrupt */
