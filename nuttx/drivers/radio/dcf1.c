@@ -314,7 +314,7 @@ static void timespec_sub(struct timespec *min, struct timespec *sub, struct time
 
 static void dcf1_rxbuf_reset(void)
 {
-		dev.rxbuf = 0;
+	dev.rxbuf = 0;
 }
 
 static void dcf1_rxbuf_append(const bool bit)
