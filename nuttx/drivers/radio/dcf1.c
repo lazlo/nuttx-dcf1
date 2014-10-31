@@ -359,14 +359,31 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 
 static void dcf1_thresholds_show(void)
 {
+	struct thr {
+		uint16_t data_0_ms;
+		uint16_t data_0_min_ms;
+		uint16_t data_0_max_ms;
+		uint16_t data_1_ms;
+		uint16_t data_1_min_ms;
+		uint16_t data_1_max_ms;
+	};
+	struct thr t = {
+		.data_0_ms	= DCF1_DATA_0_MS,
+		.data_0_min_ms	= DCF1_DATA_0_MIN_MS,
+		.data_0_max_ms	= DCF1_DATA_0_MAX_MS,
+		.data_1_ms	= DCF1_DATA_1_MS,
+		.data_1_min_ms	= DCF1_DATA_1_MIN_MS,
+		.data_1_max_ms	= DCF1_DATA_1_MAX_MS,
+	};
+
 	/* Display min/max values for decoding (only for development) */
 	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
-		DCF1_DATA_0_MS,
-		DCF1_DATA_0_MIN_MS,
-		DCF1_DATA_0_MAX_MS,
-		DCF1_DATA_1_MS,
-		DCF1_DATA_1_MIN_MS,
-		DCF1_DATA_1_MAX_MS);
+		t.data_0_ms,
+		t.data_0_min_ms,
+		t.data_0_max_ms,
+		t.data_1_ms,
+		t.data_1_min_ms,
+		t.data_1_max_ms);
 }
 
 /* Measure the time difference between a low-to-high and the next
