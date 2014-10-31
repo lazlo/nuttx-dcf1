@@ -150,14 +150,13 @@ static void	dcf1_rxbuf_reset(void);
 static void	dcf1_rxbuf_append(const bool bit);
 static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short split_nbit);
 
-/* Receive Buffer Synchonization */
-
-static bool dcf1_synchonize(void);
-
 /* Signal Processing */
 
 static long	dcf1_measure(void);
 static char	dcf1_decode(const long delta_msec);
+
+/* Receive Buffer Synchonization */
+
 static bool	dcf1_synchonize(void);
 
 /* Interrupt Handling */
