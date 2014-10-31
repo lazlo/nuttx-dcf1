@@ -134,6 +134,7 @@
 #endif
 
 /***********************************************************************/
+/* Private Types                                                       */
 /***********************************************************************/
 
 typedef FAR struct file file_t;
@@ -146,6 +147,10 @@ struct dcf1_thr {
 	uint16_t data_1_min_ms;
 	uint16_t data_1_max_ms;
 };
+
+/***********************************************************************/
+/* Private Function Prototypes                                         */
+/***********************************************************************/
 
 /* Functions that deal with I/O from/to GPIOs */
 
@@ -187,6 +192,10 @@ static int	dcf1_close(file_t *filep);
 static ssize_t	dcf1_read(file_t *filep, FAR char *buf, size_t buflen);
 static ssize_t	dcf1_write(file_t *filep, FAR const char *buf, size_t buflen);
 static int	dcf1_ioctl(file_t *filep, int cmd, unsigned long arg);
+
+/***********************************************************************/
+/* Private Variables                                                   */
+/***********************************************************************/
 
 static const struct file_operations dcf1_ops = {
 	dcf1_open,	/* open */
