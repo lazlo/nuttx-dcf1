@@ -28,6 +28,7 @@
 #include <debug.h>
 #include <time.h>
 #include <string.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,8 +109,6 @@
 
 #define DCF1_IS_START(dt)	(TS_TO_MS(dt) >= DCF1_SYNC_MARK_MIN_MS && TS_TO_MS(dt) <= DCF1_SYNC_MARK_MAX_MS)
 
-#define dcf1dbg	printf
-
 /* TODO Replace macros with static functions */
 
 #ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
@@ -184,6 +183,8 @@ struct dcf1_dev {
 /* Private Function Prototypes                                         */
 /***********************************************************************/
 
+static void	dcf1dbg(const char *format, ...);
+
 /* Functions that deal with I/O from/to GPIOs */
 
 static bool	dcf1_read_data_pin(void);
@@ -243,6 +244,15 @@ static struct dcf1_dev dev;
 /***********************************************************************/
 /* Private Functions                                                   */
 /***********************************************************************/
+
+static void dcf1dbg(const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	vprintf(format, args);
+	va_end(args);
+}
 
 /* GPIO Control ********************************************************/
 
