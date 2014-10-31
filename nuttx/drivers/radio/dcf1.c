@@ -110,6 +110,8 @@
 
 #define dcf1dbg	printf
 
+/* TODO Replace macros with static functions */
+
 #ifdef CONFIG_DEBUG_DCF1_MEASUREMENT
 # 	define dcf1dbg_me	dcf1dbg
 #else
