@@ -143,6 +143,7 @@ static void	dcf1_enable(const bool onoff);
 /* Time Measurement */
 
 static void	dcf1_getreftime(struct timespec *t);
+static void	dcf1_timespec_sub(struct timespec min, struct timespec sub, struct timespec *dif);
 
 /* Receive Buffer Management */
 
