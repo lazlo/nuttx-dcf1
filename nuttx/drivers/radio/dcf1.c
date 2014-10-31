@@ -133,6 +133,15 @@
 
 typedef FAR struct file file_t;
 
+struct dcf1_thr {
+	uint16_t data_0_ms;
+	uint16_t data_0_min_ms;
+	uint16_t data_0_max_ms;
+	uint16_t data_1_ms;
+	uint16_t data_1_min_ms;
+	uint16_t data_1_max_ms;
+};
+
 /* Functions that deal with I/O from/to GPIOs */
 
 static bool	dcf1_read_data_pin(void);
@@ -153,7 +162,7 @@ static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 
 /* Signal Processing */
 
-static void 	dcf1_thresholds_show(void);
+static void 	dcf1_thresholds_show(struct dcf1_thr *t);
 static long	dcf1_measure(void);
 static char	dcf1_decode(const long delta_msec);
 
@@ -201,6 +210,10 @@ static struct dcf1_dev {
 	struct timespec t_start; /* Time of low to high transition of data pin */
 	struct timespec t_end; /* Time of high to low transition of data pin */
 	struct timespec dt;
+
+	/* Measurement thresholds */
+
+	struct dcf1_thr thr;
 
 	uint64_t	rxbuf;
 
@@ -357,33 +370,16 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 
 /* Signal Processing ***************************************************/
 
-static void dcf1_thresholds_show(void)
+static void dcf1_thresholds_show(struct dcf1_thr *t)
 {
-	struct thr {
-		uint16_t data_0_ms;
-		uint16_t data_0_min_ms;
-		uint16_t data_0_max_ms;
-		uint16_t data_1_ms;
-		uint16_t data_1_min_ms;
-		uint16_t data_1_max_ms;
-	};
-	struct thr t = {
-		.data_0_ms	= DCF1_DATA_0_MS,
-		.data_0_min_ms	= DCF1_DATA_0_MIN_MS,
-		.data_0_max_ms	= DCF1_DATA_0_MAX_MS,
-		.data_1_ms	= DCF1_DATA_1_MS,
-		.data_1_min_ms	= DCF1_DATA_1_MIN_MS,
-		.data_1_max_ms	= DCF1_DATA_1_MAX_MS,
-	};
-
 	/* Display min/max values for decoding (only for development) */
 	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
-		t.data_0_ms,
-		t.data_0_min_ms,
-		t.data_0_max_ms,
-		t.data_1_ms,
-		t.data_1_min_ms,
-		t.data_1_max_ms);
+		t->data_0_ms,
+		t->data_0_min_ms,
+		t->data_0_max_ms,
+		t->data_1_ms,
+		t->data_1_min_ms,
+		t->data_1_max_ms);
 }
 
 /* Measure the time difference between a low-to-high and the next
@@ -689,7 +685,17 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 					uint32_t ponpin, uint32_t ledpin,
 		struct dcf1_lower_s *lower)
 {
+	struct dcf1_thr *t = &dev.thr;
+
 	dcf1dbg("dcf1_init\n");
+
+	/* Load measurement thresholds */
+	t->data_0_ms		= DCF1_DATA_0_MS;
+	t->data_0_min_ms	= DCF1_DATA_0_MIN_MS;
+	t->data_0_max_ms	= DCF1_DATA_0_MAX_MS;
+	t->data_1_ms		= DCF1_DATA_1_MS;
+	t->data_1_min_ms	= DCF1_DATA_1_MIN_MS;
+	t->data_1_max_ms	= DCF1_DATA_1_MAX_MS;
 
 	/* Initialize the device state */
 	dev.gpio_data = datapin;
@@ -723,5 +729,5 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	(void)register_driver(DCF1_DEVFILE, &dcf1_ops, 0444, NULL);
 
 	/* Display the configuration of the measurement thresholds */
-	dcf1_thresholds_show();
+	dcf1_thresholds_show(&dev.thr);
 }
