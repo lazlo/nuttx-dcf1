@@ -103,11 +103,14 @@ int dcf1_main(int argc, char *argv[])
   if (fd == -1)
     {
       printf("ERROR open %d\n", errno);
+      return -1;
     }
   rv = ioctl(fd, RFIOCS_ONOFF, (unsigned long)onoff);
   if (rv == -1)
     {
       printf("ERROR ioctl %d\n", errno);
+      close(fd);
+      return -1;
     }
   rv = close(fd);
   if (rv == -1)
