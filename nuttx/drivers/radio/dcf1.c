@@ -148,6 +148,38 @@ struct dcf1_thr {
 	uint16_t data_1_max_ms;
 };
 
+struct dcf1_dev {
+
+	uint32_t	gpio_data;
+	uint32_t	gpio_pon;
+	uint32_t	gpio_led;
+
+	struct dcf1_gpio_s *pinops;
+	struct dcf1_lower_s *lower;
+
+	bool		led_out_state;
+	struct work_s	irqwork;
+
+	bool		data_in_state;
+	bool		data_in_state_last;
+
+	struct timespec t_start; /* Time of low to high transition of data pin */
+	struct timespec t_end; /* Time of high to low transition of data pin */
+	struct timespec dt;
+
+	/* Measurement thresholds */
+
+	struct dcf1_thr thr;
+
+	uint64_t	rxbuf;
+
+	/* Receive Buffer Synchonization */
+
+	struct timespec ti_last;
+	struct timespec ti;
+	struct timespec tid;
+};
+
 /***********************************************************************/
 /* Private Function Prototypes                                         */
 /***********************************************************************/
@@ -206,37 +238,7 @@ static const struct file_operations dcf1_ops = {
 	dcf1_ioctl,	/* ioctl */
 };
 
-static struct dcf1_dev {
-
-	uint32_t	gpio_data;
-	uint32_t	gpio_pon;
-	uint32_t	gpio_led;
-
-	struct dcf1_gpio_s *pinops;
-	struct dcf1_lower_s *lower;
-
-	bool		led_out_state;
-	struct work_s	irqwork;
-
-	bool		data_in_state;
-	bool		data_in_state_last;
-
-	struct timespec t_start; /* Time of low to high transition of data pin */
-	struct timespec t_end; /* Time of high to low transition of data pin */
-	struct timespec dt;
-
-	/* Measurement thresholds */
-
-	struct dcf1_thr thr;
-
-	uint64_t	rxbuf;
-
-	/* Receive Buffer Synchonization */
-
-	struct timespec ti_last;
-	struct timespec ti;
-	struct timespec tid;
-} dev;
+static struct dcf1_dev dev;
 
 /***********************************************************************/
 /* Private Functions                                                   */
