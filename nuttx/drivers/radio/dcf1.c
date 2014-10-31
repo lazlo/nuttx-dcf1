@@ -78,6 +78,7 @@
 #define DCF1_REFCLOCK	CLOCK_MONOTONIC
 
 /* Configuration for decoding the signal provided by the DCF1 module */
+/* TODO Stuff that is DCF77 specific is to be moved to the dcf77.h */
 
 #define DCF1_DATA_0_MS		100
 #define DCF1_DATA_1_MS		200
