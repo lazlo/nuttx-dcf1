@@ -153,6 +153,7 @@ static void	dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 
 /* Signal Processing */
 
+static void 	dcf1_thresholds_show(void);
 static long	dcf1_measure(void);
 static char	dcf1_decode(const long delta_msec);
 
@@ -355,6 +356,18 @@ static void dcf1_rxbuf_show(const unsigned short rxbuflen, const unsigned short 
 }
 
 /* Signal Processing ***************************************************/
+
+static void dcf1_thresholds_show(void)
+{
+	/* Display min/max values for decoding (only for development) */
+	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
+		DCF1_DATA_0_MS,
+		DCF1_DATA_0_MIN_MS,
+		DCF1_DATA_0_MAX_MS,
+		DCF1_DATA_1_MS,
+		DCF1_DATA_1_MIN_MS,
+		DCF1_DATA_1_MAX_MS);
+}
 
 /* Measure the time difference between a low-to-high and the next
  * high-to-low transisition on the DATA pin in miliseconds. */
@@ -692,12 +705,6 @@ void dcf1_init(struct dcf1_gpio_s *pinops, uint32_t datapin,
 	/* Finally register the driver */
 	(void)register_driver(DCF1_DEVFILE, &dcf1_ops, 0444, NULL);
 
-	/* Display min/max values for decoding (only for development) */
-	dcf1dbg("dcf1 0 = %d ms (min: %d max: %d) 1 = %d ms (min: %d max: %d)\n",
-		DCF1_DATA_0_MS,
-		DCF1_DATA_0_MIN_MS,
-		DCF1_DATA_0_MAX_MS,
-		DCF1_DATA_1_MS,
-		DCF1_DATA_1_MIN_MS,
-		DCF1_DATA_1_MAX_MS);
+	/* Display the configuration of the measurement thresholds */
+	dcf1_thresholds_show();
 }
