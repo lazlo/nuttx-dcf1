@@ -90,6 +90,9 @@
 /* Helpers                                                             */
 /***********************************************************************/
 
+/* TODO Replace macros and instead use calculations for values in
+ * 	threshold struct. */
+
 #define DCF1_DATA_0_ERR_MS	DCF1_DATA_ERR_MS
 #define DCF1_DATA_0_MAX_MS	(DCF1_DATA_0_MS + DCF1_DATA_0_ERR_MS)
 #define DCF1_DATA_0_MIN_MS	(DCF1_DATA_0_MS - DCF1_DATA_0_ERR_MS)
