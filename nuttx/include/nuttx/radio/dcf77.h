@@ -46,7 +46,7 @@ struct dcf77msg
   uint64_t m10          : 1;  /* 25 */
   uint64_t m20          : 1;  /* 26 */
   uint64_t m40          : 1;  /* 27 */
-  uint64_t m_parity     : 1;  /* 28 - parity over minute bits 21-28 */
+  uint64_t p1           : 1;  /* 28 - even parity over minute bits 21-28 */
 
   /* hours + parity bit (29:35) */
 
@@ -56,7 +56,7 @@ struct dcf77msg
   uint64_t h8           : 1;  /* 32 */
   uint64_t h10          : 1;  /* 33 */
   uint64_t h20          : 1;  /* 34 */
-  uint64_t              : 1;  /* 35 - parity over hour bits 29-35 */
+  uint64_t p2           : 1;  /* 35 - even parity over hour bits 29-35 */
 
   /* day of month (36:39) */
 
@@ -96,7 +96,7 @@ struct dcf77msg
   uint64_t y20          : 1; /* 55 */
   uint64_t y40          : 1; /* 56 */
   uint64_t y80          : 1; /* 57 */
-  uint64_t              : 1; /* 58 - parity over bits 36-58 */
+  uint64_t p            : 1; /* 58 - even parity over bits 36-58 */
   uint64_t end          : 1; /* 59 end of minute mark */
 
   /* END OF DCF77 message */
