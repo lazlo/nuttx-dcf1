@@ -78,7 +78,8 @@ int dcf1_main(int argc, char *argv[])
 
   if (argc != 2)
     {
-      printf("Usage: %s on|off\n", argv[0]);
+      /* FIXME argv[0] contains "<noname>\n" but should contain the program name! */
+      printf("Usage: %s on|off\n", "dcf1");
       return 1;
     }
 
