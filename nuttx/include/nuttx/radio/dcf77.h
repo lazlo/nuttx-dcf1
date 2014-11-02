@@ -119,15 +119,13 @@ inline int dcf77msg_minute(const struct dcf77msg m)
 {
 	int minute = 0;
 
-	minute += m.m1 ? 1 : 0;
-	minute += m.m2 ? 2 : 0;
-	minute += m.m4 ? 4 : 0;
-	minute += m.m8 ? 8 : 0;
-	minute += m.m10 ? 10 : 0;
-	minute += m.m20 ? 20 : 0;
-	minute += m.m40 ? 40 : 0;
-
-	/* TODO parity for minute */
+	if (m.m1) { minute += 1; }
+	if (m.m2) { minute += 2; }
+	if (m.m4) { minute += 4; }
+	if (m.m8) { minute += 8; }
+	if (m.m10) { minute += 10; }
+	if (m.m20) { minute += 20; }
+	if (m.m40) { minute += 40; }
 
 	return minute;
 }
@@ -136,14 +134,12 @@ inline int dcf77msg_hour(const struct dcf77msg m)
 {
 	int hour = 0;
 
-	hour += m.h1 ? 1 : 0;
-	hour += m.h2 ? 2 : 0;
-	hour += m.h4 ? 4 : 0;
-	hour += m.h8 ? 8 : 0;
-	hour += m.h10 ? 10 : 0;
-	hour += m.h20 ? 20 : 0;
-
-	/* TODO partity for hour */
+	if (m.h1)  { hour += 1; }
+	if (m.h2)  { hour += 2; }
+	if (m.h4)  { hour += 4; }
+	if (m.h8)  { hour += 8; }
+	if (m.h10) { hour += 10; }
+	if (m.h20) { hour += 20; }
 
 	return hour;
 }
