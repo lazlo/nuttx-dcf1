@@ -27,11 +27,11 @@ struct dcf77msg
 
   /* call bit/summer time/CEST/CET/leap second 15:19 */
 
-  uint64_t              : 1;  /* 15 */
-  uint64_t              : 1;  /* 16 */
-  uint64_t              : 1;  /* 17 */
-  uint64_t              : 1;  /* 18 */
-  uint64_t              : 1;  /* 19 */
+  uint64_t r            : 1;  /* 15 call bit. abnormal transmitter operation */
+  uint64_t a1           : 1;  /* 16 summer time announcment. set during hour before change */
+  uint64_t z1           : 1;  /* 17 set to 1 when CEST is in effect */
+  uint64_t z2           : 1;  /* 18 set to 1 when CET is in effect */
+  uint64_t a2           : 1;  /* 19 set during hour before leap second */
 
   /*--- page 2 (20:39) ---*/
 
