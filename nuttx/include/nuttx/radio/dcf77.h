@@ -104,6 +104,11 @@ struct dcf77msg
   uint64_t pad          : 4; /* 60:64 */
 };
 
+union dcf77msg_u {
+	uint64_t raw;
+	struct dcf77msg msg;
+};
+
 /* Checks for the respective bits that make a valid DCF77 message */
 inline bool dcf77msg_valid(const struct dcf77msg m)
 {
@@ -200,6 +205,7 @@ inline int dcf77msg_year(const struct dcf77msg m)
 
 inline void dcf77msg_dump(struct dcf77msg m)
 {
+	union dcf77msg_u u = {.msg = m};
 	struct datatime {
 		int minute;
 		int hour;
@@ -208,12 +214,12 @@ inline void dcf77msg_dump(struct dcf77msg m)
 		int month;
 		int year;
 	} i = {
-		.minute		= dcf77msg_minute(m),
-		.hour		= dcf77msg_hour(m),
-		.day		= dcf77msg_day(m),
-		.weekday	= dcf77msg_weekday(m),
-		.month		= dcf77msg_month(m),
-		.year		= dcf77msg_year(m),
+		.minute		= dcf77msg_minute(u.msg),
+		.hour		= dcf77msg_hour(u.msg),
+		.day		= dcf77msg_day(u.msg),
+		.weekday	= dcf77msg_weekday(u.msg),
+		.month		= dcf77msg_month(u.msg),
+		.year		= dcf77msg_year(u.msg),
 	};
 
 	/* TODO Check parity bit 58 for bits 36 to 58 */
