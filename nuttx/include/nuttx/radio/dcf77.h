@@ -25,7 +25,7 @@ struct dcf77msg
   uint64_t              : 1;  /* 13 */
   uint64_t              : 1;  /* 14 */
 
-  /* call bit/summer time/CEST/CET/leap second 15:19 */
+  /* call bit/summer time/CEST/CET/leap second (15:19) */
 
   uint64_t r            : 1;  /* 15 call bit. abnormal transmitter operation */
   uint64_t a1           : 1;  /* 16 summer time announcment. set during hour before change */
@@ -72,13 +72,13 @@ struct dcf77msg
   uint64_t dm10         : 1; /* 40 */
   uint64_t dm20         : 1; /* 41 */
 
-  /* day of week (42:44) */
+  /* day of week (1=Monday,...,7=Sunday) (42:44) */
 
   uint64_t dw1          : 1; /* 42 */
   uint64_t dw2          : 1; /* 43 */
   uint64_t dw4          : 1; /* 44 */
 
-  /* month number (0-99) (45:49) */
+  /* month number (1-12) (45:49) */
 
   uint64_t mn1          : 1; /* 45 */
   uint64_t mn2          : 1; /* 46 */
@@ -86,7 +86,7 @@ struct dcf77msg
   uint64_t mn8          : 1; /* 48 */
   uint64_t mn10         : 1; /* 49 */
 
-  /* year within century (50:57) */
+  /* year within century (0-99) (50:57) */
 
   uint64_t y1           : 1; /* 50 */
   uint64_t y2           : 1; /* 51 */
