@@ -96,7 +96,7 @@ struct dcf77msg
   uint64_t y20          : 1; /* 55 */
   uint64_t y40          : 1; /* 56 */
   uint64_t y80          : 1; /* 57 */
-  uint64_t p            : 1; /* 58 - even parity over bits 36-58 */
+  uint64_t p3           : 1; /* 58 - even parity over bits 36-58 */
   uint64_t end          : 1; /* 59 end of minute mark */
 
   /* END OF DCF77 message */
