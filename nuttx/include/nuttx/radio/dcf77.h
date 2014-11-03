@@ -70,7 +70,7 @@ struct dcf77msg
   /* day of month (40:41) */
 
   uint64_t dm10         : 1; /* 40 */
-  uint64_t dm20         : 1; /* 42 */
+  uint64_t dm20         : 1; /* 41 */
 
   /* day of week (42:44) */
 
