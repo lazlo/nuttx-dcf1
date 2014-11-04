@@ -556,8 +556,12 @@ static bool dcf1_synchonize(void)
  */
 static void dcf1_irqworker(FAR void *arg)
 {
+	const int dcf77msg_nbits = 60;
+	const int pad = 64 % dcf77msg_nbits;
+
 	long delta_msec = 0;
 	char bit;
+	int i;
 
 	/*
 	 * Measure low/high phase duration
@@ -584,7 +588,7 @@ static void dcf1_irqworker(FAR void *arg)
 		 * the first or the last 60 bits (little or big endian with respect
 		 * to the direction the bits are shifted in!).
 		 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
-		dcf1_rxbuf_show(60, 20);
+		dcf1_rxbuf_show(dcf77msg_nbits, 20);
 
 		if (dcf1_synchonize())
 		{
@@ -592,10 +596,11 @@ static void dcf1_irqworker(FAR void *arg)
 
 			/* When shifting right, we right padd the
 			 * receive buffer by 4 bits */
-			dcf1_rxbuf_append(0);
-			dcf1_rxbuf_append(0);
-			dcf1_rxbuf_append(0);
-			dcf1_rxbuf_append(0);
+			for (i = 0; i < pad; i++)
+			{
+				dcf1_rxbuf_append(0);
+				dcf1_rxbuf_show(dcf77msg_nbits, 20);
+			}
 
 			/* TODO Replace with call to dcf1_rxbuf_get() */
 			struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
