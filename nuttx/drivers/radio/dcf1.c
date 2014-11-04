@@ -603,7 +603,7 @@ static void dcf1_irqworker(FAR void *arg)
 			}
 
 			/* TODO Replace with call to dcf1_rxbuf_get() */
-			struct dcf77msg *m = (struct dcf77msg *)&dev.rxbuf;
+			struct dcf77msg_s *m = (struct dcf77msg_s *)&dev.rxbuf;
 
 			if (dcf77msg_valid(*m))
 			{

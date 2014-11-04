@@ -2,7 +2,7 @@
 
 #pragma once
 
-struct dcf77msg
+struct dcf77msg_s
 {
   /*--- page 1 (0:19) ---*/
 
@@ -106,11 +106,11 @@ struct dcf77msg
 
 union dcf77msg_u {
 	uint64_t raw;
-	struct dcf77msg msg;
+	struct dcf77msg_s msg;
 };
 
 /* Checks for the respective bits that make a valid DCF77 message */
-inline bool dcf77msg_valid(const struct dcf77msg m)
+inline bool dcf77msg_valid(const struct dcf77msg_s m)
 {
 	bool valid = false;
 
@@ -120,7 +120,7 @@ inline bool dcf77msg_valid(const struct dcf77msg m)
 	return valid;
 }
 
-inline int dcf77msg_minute(const struct dcf77msg m)
+inline int dcf77msg_minute(const struct dcf77msg_s m)
 {
 	int minute = 0;
 
@@ -135,7 +135,7 @@ inline int dcf77msg_minute(const struct dcf77msg m)
 	return minute;
 }
 
-inline int dcf77msg_hour(const struct dcf77msg m)
+inline int dcf77msg_hour(const struct dcf77msg_s m)
 {
 	int hour = 0;
 
@@ -149,7 +149,7 @@ inline int dcf77msg_hour(const struct dcf77msg m)
 	return hour;
 }
 
-inline int dcf77msg_day(const struct dcf77msg m)
+inline int dcf77msg_day(const struct dcf77msg_s m)
 {
 	int day = 0;
 
@@ -163,7 +163,7 @@ inline int dcf77msg_day(const struct dcf77msg m)
 	return day;
 }
 
-inline int dcf77msg_weekday(const struct dcf77msg m)
+inline int dcf77msg_weekday(const struct dcf77msg_s m)
 {
 	int weekday = 0;
 
@@ -174,7 +174,7 @@ inline int dcf77msg_weekday(const struct dcf77msg m)
 	return weekday;
 }
 
-inline int dcf77msg_month(const struct dcf77msg m)
+inline int dcf77msg_month(const struct dcf77msg_s m)
 {
 	int month = 0;
 
@@ -187,7 +187,7 @@ inline int dcf77msg_month(const struct dcf77msg m)
 	return month;
 }
 
-inline int dcf77msg_year(const struct dcf77msg m)
+inline int dcf77msg_year(const struct dcf77msg_s m)
 {
 	int year = 0;
 
@@ -203,7 +203,7 @@ inline int dcf77msg_year(const struct dcf77msg m)
 	return year;
 }
 
-inline void dcf77msg_dump(struct dcf77msg m)
+inline void dcf77msg_dump(struct dcf77msg_s m)
 {
 	union dcf77msg_u u = {.msg = m};
 	struct datatime {
