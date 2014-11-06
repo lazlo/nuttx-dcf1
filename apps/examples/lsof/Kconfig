@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_LSOF
+	bool "lsof example"
+	default n
+	---help---
+		Enable the \"lsof\" example
+
+if EXAMPLES_LSOF
+
+config EXAMPLES_LSOF_PROGNAME
+	string "Program name"
+	default "lsof"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+endif
