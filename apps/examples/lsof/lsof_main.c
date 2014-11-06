@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
+#include <nuttx/fs/fs.h>
 #include <stdio.h>
 
 /****************************************************************************
@@ -47,6 +49,27 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void getfilelist(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  int i;
+  struct file *filep;
+  char *fname;
+
+  if (!tcb)
+    return;
+
+  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+    {
+      filep = &tcb->group->tg_filelist.fl_files[i];
+      fname = (char *)&filep->f_inode->i_name;
+      printf("%2d %s\n", i, fname);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -62,6 +85,14 @@ int main(int argc, FAR char *argv[])
 int lsof_main(int argc, char *argv[])
 #endif
 {
-  printf("lsof\n");
+
+  /* TODO Get a list of pids for all tasks */
+  irqstate_t flags = irqsave();
+  sched_foreach(getfilelist, NULL);
+  irqrestore(flags);
+
+  /* TODO Get the filetable from the TCB of each task */
+  /* TODO List all open files */
+
   return 0;
 }
