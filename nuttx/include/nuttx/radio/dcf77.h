@@ -109,6 +109,40 @@ union dcf77msg_u {
 	struct dcf77msg_s msg;
 };
 
+/*
+ * TODO Check if the parity function work from the right direction with respect to the bits inserted into the receive buffer
+ * data		uint64_t used as string of bits
+ * offset	start from this bit offset
+ * nbits	number of bits to check
+ * even		true for even, false for odd parity
+ */
+inline int check_parity(const uint64_t data, const int offset, const int nbits,
+				bool even)
+{
+	const int len = 8 * sizeof(uint64_t);
+	int pos;
+	int count = 0;
+	bool set;
+
+	printf("check bits %d:%d for %s parity", offset, offset+nbits,
+					even ? "even" : "odd");
+
+	printf(" start:%2d {", offset);
+
+	/* Count the number of bits set */
+	for (pos = offset; pos < offset+nbits; pos++)
+	{
+		set = (data & ((uint64_t)1 << pos)) ? true : false;
+		if (set) count++;
+
+		printf("%d", set ? 1 : 0);
+	}
+	printf("} end:%d (%d bits set)\n", pos, count);
+
+	/* Calculate parity on our own */
+	return (count % 2 == (int)!even);
+}
+
 /* Checks for the respective bits that make a valid DCF77 message */
 inline bool dcf77msg_valid(const struct dcf77msg_s m)
 {
@@ -222,7 +256,12 @@ inline void dcf77msg_dump(struct dcf77msg_s m)
 		.year		= dcf77msg_year(u.msg),
 	};
 
-	/* TODO Check parity bit 58 for bits 36 to 58 */
+	if (u.msg.p1 != check_parity(u.raw, 21, 7, true))
+		printf("minute parity error (p1)\n");
+	if (u.msg.p2 != check_parity(u.raw, 29, 6, true))
+		printf("hour parity error (p2)\n");
+	if (u.msg.p3 != check_parity(u.raw, 36, 22, true))
+		printf("date parity error (p3)\n");
 
 	printf("\n");
 	printf("DCF77 Message: %4d-%02d-%02d (%d) %02d:%02d\n",
