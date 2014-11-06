@@ -558,6 +558,7 @@ static void dcf1_irqworker(FAR void *arg)
 {
 	const int dcf77msg_nbits = 60;
 	const int pad = 64 % dcf77msg_nbits;
+	const int groupbits = 5;
 
 	long delta_msec = 0;
 	char bit;
@@ -588,7 +589,7 @@ static void dcf1_irqworker(FAR void *arg)
 		 * the first or the last 60 bits (little or big endian with respect
 		 * to the direction the bits are shifted in!).
 		 * You see, this is already complicated and causes bugs in dcf1_rxbuf_show()! */
-		dcf1_rxbuf_show(dcf77msg_nbits, 20);
+		dcf1_rxbuf_show(dcf77msg_nbits, groupbits);
 
 		if (dcf1_synchonize())
 		{
@@ -599,7 +600,7 @@ static void dcf1_irqworker(FAR void *arg)
 			for (i = 0; i < pad; i++)
 			{
 				dcf1_rxbuf_append(0);
-				dcf1_rxbuf_show(dcf77msg_nbits, 20);
+				dcf1_rxbuf_show(dcf77msg_nbits, groupbits);
 			}
 
 			/* TODO Replace with call to dcf1_rxbuf_get() */
