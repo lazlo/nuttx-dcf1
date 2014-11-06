@@ -45,6 +45,7 @@ SUBDIRS += nxlines nxtext ostest pashello pipe poll posix_spawn pwm qencoder
 SUBDIRS += random relays rgmp romfs sendmail serialblaster serloop serialrx
 SUBDIRS += slcd smart smart_test tcpecho telnetd thttpd tiff touchscreen udp
 SUBDIRS += usbserial usbterm watchdog webserver wget wgetjson xmlrpc
+SUBDIRS += lsof
 
 # Sub-directories that might need context setup.  Directories may need
 # context setup for a variety of reasons, but the most common is because
@@ -59,6 +60,7 @@ CNTXTDIRS += netpkt nettest nx nxhello nximage nxlines nxtext nrf24l01_term
 CNTXTDIRS += ostest random relays qencoder serialblasterslcd serialrx
 CNTXTDIRS += smart_test tcpecho telnetd tiff touchscreen usbterm watchdog
 CNTXTDIRS += wgetjson
+CNTXTDIRS += lsof
 endif
 
 all: nothing
