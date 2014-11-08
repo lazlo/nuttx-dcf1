@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/olimex-stm32-h405/src/stm32_adc.c
+ * configs/stm32f429i-disco/src/stm32_adc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
