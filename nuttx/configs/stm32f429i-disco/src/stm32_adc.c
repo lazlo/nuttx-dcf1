@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 #include "chip.h"
 #include "stm32_adc.h"
-#include "olimex-stm32-h405.h"
+#include "stm32f429i-disco.h"
 
 #ifdef CONFIG_ADC
 
