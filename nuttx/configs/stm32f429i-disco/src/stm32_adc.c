@@ -87,8 +87,7 @@
 /* Identifying number of each ADC channel: Variable Resistor. */
 
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};
-/*                                                 {1,  2,  3,
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};/*,  2,  3,
                                                     4,  5,  6,
                                                     7,  8,  9,
                                                     10, 11, 12,
@@ -96,44 +95,7 @@ static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};
-/*                                                 {GPIO_ADC1_IN1,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3,
-                                                    GPIO_ADC1_IN4,  GPIO_ADC1_IN5,  GPIO_ADC1_IN6,
-                                                    GPIO_ADC1_IN7,  GPIO_ADC1_IN8,  GPIO_ADC1_IN9,
-                                                    GPIO_ADC1_IN10, GPIO_ADC1_IN11, GPIO_ADC1_IN12,
-                                                    GPIO_ADC1_IN13, GPIO_ADC1_IN15};*/
-#endif
-
-#ifdef CONFIG_STM32_ADC2
-static const uint8_t g_chanlist[ADC2_NCHANNELS] = {};
-/*                                                 {1,  2,  3,
-                                                    4,  5,  6,
-                                                    7,  8,  9,
-                                                    10, 11, 12,
-                                                    13, 15};*/
-
-/* Configurations of pins used byte each ADC channels */
-
-static const uint32_t g_pinlist[ADC2_NCHANNELS] = {};
-/*                                                 {GPIO_ADC2_IN1,  GPIO_ADC2_IN2,  GPIO_ADC2_IN3,
-                                                    GPIO_ADC2_IN4,  GPIO_ADC2_IN5,  GPIO_ADC2_IN6,
-                                                    GPIO_ADC2_IN7,  GPIO_ADC2_IN8,  GPIO_ADC2_IN9,
-                                                    GPIO_ADC2_IN10, GPIO_ADC2_IN11, GPIO_ADC2_IN12,
-                                                    GPIO_ADC2_IN13, GPIO_ADC2_IN15};*/
-#endif
-
-#ifdef CONFIG_STM32_ADC3
-static const uint8_t g_chanlist[ADC3_NCHANNELS] = {4};
-/*                                                 {1,  2,  3,
-                                                    4,  5,  6,
-                                                    7,  8,  9,
-                                                    10, 11, 12,
-                                                    13, 15};*/
-
-/* Configurations of pins used byte each ADC channels */
-
-static const uint32_t g_pinlist[ADC3_NCHANNELS] = {GPIO_ADC3_IN4};
-/*                                                 {GPIO_ADC1_IN1,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3,
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};/*,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3,
                                                     GPIO_ADC1_IN4,  GPIO_ADC1_IN5,  GPIO_ADC1_IN6,
                                                     GPIO_ADC1_IN7,  GPIO_ADC1_IN8,  GPIO_ADC1_IN9,
                                                     GPIO_ADC1_IN10, GPIO_ADC1_IN11, GPIO_ADC1_IN12,
@@ -172,7 +134,7 @@ int adc_devinit(void)
 
 int stm32_adc_initialize(void)
 {
-#ifdef CONFIG_STM32_ADC3
+#ifdef CONFIG_STM32_ADC1
   static bool initialized = false;
   struct adc_dev_s *adc;
   int ret;
@@ -184,7 +146,7 @@ int stm32_adc_initialize(void)
     {
       /* Configure the pins as analog inputs for the selected channels */
 
-      for (i = 0; i < ADC3_NCHANNELS; i++)
+      for (i = 0; i < ADC1_NCHANNELS; i++)
         {
           stm32_configgpio(g_pinlist[i]);
         }
@@ -198,9 +160,9 @@ int stm32_adc_initialize(void)
           return -ENODEV;
         }
 
-      /* Register the ADC driver at "/dev/adc3" */
+      /* Register the ADC driver at "/dev/adc0" */
 
-      ret = adc_register("/dev/adc3", adc);
+      ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
           adbg("adc_register failed: %d\n", ret);
