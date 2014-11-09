@@ -216,6 +216,18 @@ void stm32_pmbuttons(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_adc_initialize
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ADC) && (defined(CONFIG_STM32_ADC1) || \
+                            defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3))
+int stm32_adc_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: nsh_archinitialize
  *
  * Description:
