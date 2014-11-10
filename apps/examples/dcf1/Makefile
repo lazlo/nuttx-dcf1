@@ -1,7 +1,7 @@
 ############################################################################
-# drivers/Makefile
+# apps/examples/dcf1/Makefile
 #
-#   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,101 +33,101 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
-DELIM ?= $(strip /)
+include $(APPDIR)/Make.defs
 
-ifeq ($(WINTOOL),y)
-INCDIROPT = -w
-endif
+# DCF1 built-in application info
 
-DEPPATH = --dep-path .
+APPNAME = dcf1
+PRIORITY = SCHED_PRIORITY_DEFAULT
+STACKSIZE = 2048
+
+# Hello, World! Example
+
 ASRCS =
 CSRCS =
-VPATH = .
-
-# Include support for various drivers.  Each Make.defs file will add its
-# files to the source file list, add its DEPPATH info, and will add
-# the appropriate paths to the VPATH variable
-
-include analog$(DELIM)Make.defs
-include audio$(DELIM)Make.defs
-include bch$(DELIM)Make.defs
-include input$(DELIM)Make.defs
-include lcd$(DELIM)Make.defs
-include mmcsd$(DELIM)Make.defs
-include mtd$(DELIM)Make.defs
-include net$(DELIM)Make.defs
-include pipes$(DELIM)Make.defs
-include power$(DELIM)Make.defs
-include sensors$(DELIM)Make.defs
-include sercomm$(DELIM)Make.defs
-include serial$(DELIM)Make.defs
-include spi$(DELIM)Make.defs
-include syslog$(DELIM)Make.defs
-include usbdev$(DELIM)Make.defs
-include usbhost$(DELIM)Make.defs
-include video$(DELIM)Make.defs
-include wireless$(DELIM)Make.defs
-include radio$(DELIM)Make.defs
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-  CSRCS += dev_null.c dev_zero.c loop.c
-
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c
-ifeq ($(CONFIG_DRVR_WRITEBUFFER),y)
-  CSRCS += rwbuffer.c
-else
-ifeq ($(CONFIG_DRVR_READAHEAD),y)
-  CSRCS += rwbuffer.c
-endif
-endif
-endif
-
-ifeq ($(CONFIG_CAN),y)
-  CSRCS += can.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-  CSRCS += pwm.c
-endif
-
-ifeq ($(CONFIG_WATCHDOG),y)
-  CSRCS += watchdog.c
-endif
-
-ifeq ($(CONFIG_TIMER),y)
-  CSRCS += timer.c
-endif
-endif
+MAINSRC = dcf1_main.c
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
+MAINOBJ = $(MAINSRC:.c=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS)
+SRCS = $(ASRCS) $(CSRCS) $(MAINSRC)
 OBJS = $(AOBJS) $(COBJS)
 
-BIN = libdrivers$(LIBEXT)
+ifneq ($(CONFIG_BUILD_KERNEL),y)
+  OBJS += $(MAINOBJ)
+endif
 
-all: $(BIN)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  BIN = ..\..\libapps$(LIBEXT)
+else
+ifeq ($(WINTOOL),y)
+  BIN = ..\\..\\libapps$(LIBEXT)
+else
+  BIN = ../../libapps$(LIBEXT)
+endif
+endif
+
+ifeq ($(WINTOOL),y)
+  INSTALL_DIR = "${shell cygpath -w $(BIN_DIR)}"
+else
+  INSTALL_DIR = $(BIN_DIR)
+endif
+
+CONFIG_EXAMPLES_HELLO_PROGNAME ?= hello$(EXEEXT)
+PROGNAME = $(CONFIG_EXAMPLES_HELLO_PROGNAME)
+
+ROOTDEPPATH = --dep-path .
+
+# Common build
+
+VPATH =
+
+all: .built
+.PHONY: clean depend distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): %$(OBJEXT): %.c
+$(COBJS) $(MAINOBJ): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+.built: $(OBJS)
+	$(call ARCHIVE, $(BIN), $(OBJS))
+	@touch .built
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+$(BIN_DIR)$(DELIM)$(PROGNAME): $(OBJS) $(MAINOBJ)
+	@echo "LD: $(PROGNAME)"
+	$(Q) $(LD) $(LDELFFLAGS) $(LDLIBPATH) -o $(INSTALL_DIR)$(DELIM)$(PROGNAME) $(ARCHCRT0OBJ) $(MAINOBJ) $(LDLIBS)
+	$(Q) $(NM) -u  $(INSTALL_DIR)$(DELIM)$(PROGNAME)
+
+install: $(BIN_DIR)$(DELIM)$(PROGNAME)
+
+else
+install:
+
+endif
+
+ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
+$(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat: $(DEPCONFIG) Makefile
+	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
+
+context: $(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat
+else
+context:
+endif
 
 .depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 
 clean:
-	$(call DELFILE, $(BIN))
+	$(call DELFILE, .built)
 	$(call CLEAN)
 
 distclean: clean

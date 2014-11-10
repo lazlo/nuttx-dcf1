@@ -62,6 +62,10 @@ ifeq ($(CONFIG_EXAMPLES_CXXTEST),y)
 CONFIGURED_APPS += examples/cxxtest
 endif
 
+ifeq ($(CONFIG_EXAMPLES_DCF1),y)
+CONFIGURED_APPS += examples/dcf1
+endif
+
 ifeq ($(CONFIG_EXAMPLES_DHCPD),y)
 CONFIGURED_APPS += examples/dhcpd
 endif

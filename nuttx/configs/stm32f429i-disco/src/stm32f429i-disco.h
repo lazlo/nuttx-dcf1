@@ -246,6 +246,9 @@ int stm32_adc_initialize(void);
 int nsh_archinitialize(void);
 #endif
 
+
+void up_dcf1initialize(void); /* defined in up_dcf1.c */
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
 
