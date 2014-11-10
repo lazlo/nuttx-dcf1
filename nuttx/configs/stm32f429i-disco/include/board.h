@@ -230,6 +230,11 @@
 #define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
 #define GPIO_SPI4_SCK  GPIO_SPI4_SCK_1
 
+/* I2C */
+
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_1 // PB6
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_1 // PB7
+
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 
 #define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2
