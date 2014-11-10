@@ -149,7 +149,7 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+#if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(CONFIG_ADC)
   int ret;
 #endif
 #if defined(CONFIG_STM32_SPI5) || defined(CONFIG_STM32_SPI4)
@@ -158,6 +158,16 @@ int nsh_archinitialize(void)
 #endif
 #if defined(CONFIG_MTD_PARTITION_NAMES)
   FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
+#endif
+
+#ifdef CONFIG_ADC
+  /* Configure on-board ADCs if ADC support has been selected. */
+
+  ret = stm32_adc_initialize();
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Failed to initialize ADC: %d\n", ret);
+    }
 #endif
 
   /* Configure SPI-based devices */
