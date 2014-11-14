@@ -232,8 +232,8 @@
 
 /* I2C */
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_1 // PB6
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_1 // PB7
+#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1 // PA8
+#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1 // PC9
 
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 
