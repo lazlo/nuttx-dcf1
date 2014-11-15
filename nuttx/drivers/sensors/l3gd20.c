@@ -77,7 +77,19 @@
  * HPCF2     (1 << 2)
  * HPCF1     (1 << 1)
  * HPCF1     (1 << 0)
- *
+ */
+
+/* High-pass filter mode selection */
+
+#define ST_L3GD20_CTRL_REG2_HPM_MASK 0x30
+#define ST_L3GD20_CTRL_REG2_HPM_SHIFT 4
+
+/* High-pass filter cut off frequency configuration */
+
+#define ST_L3GD20_CTRL_REG2_HPCF_MASK 0x0F
+#define ST_L3GD20_CTRL_REG2_HPCF_SHIFT 0
+
+/*
  * CTRL_REG3
  * I1_Int1   (1 << 7)
  * I1_Boot   (1 << 6)
