@@ -65,6 +65,14 @@ EXTERN int l3gd20_setfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e m
 
 EXTERN int l3gd20_getfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e *mode);
 
+/** Set FIFO watermark */
+
+EXTERN int l3gd20_setfifoths(struct l3gd20_dev_s *dev, uint8_t ths);
+
+/** Get FIFO watermark */
+
+EXTERN int l3gd20_getfifoths(struct l3gd20_dev_s *dev, uint8_t *ths);
+
 /** Read thresholds */
 
 EXTERN int l3gd20_setthresholds(struct l3gd20_vector_s * vect);
