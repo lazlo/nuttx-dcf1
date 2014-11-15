@@ -104,6 +104,12 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_STM32_FSMC
   stm32_enablefsmc();
 #endif
+
+  /* Configure the on-board Gyroscope if support has been selected. */
+
+#ifdef CONFIG_L3GD20
+  stm32_mems_initialize();
+#endif
 }
 
 /****************************************************************************

@@ -249,6 +249,10 @@ int nsh_archinitialize(void);
 
 void up_dcf1initialize(void); /* defined in up_dcf1.c */
 
+#ifdef CONFIG_L3GD20
+void stm32_mems_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
 

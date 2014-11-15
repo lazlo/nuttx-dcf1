@@ -84,6 +84,10 @@ ifeq ($(CONFIG_RADIO_DCF1),y)
 CSRCS += up_dcf1.c
 endif
 
+ifeq ($(CONFIG_L3GD20),y)
+CSRCS += stm32_mems.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
