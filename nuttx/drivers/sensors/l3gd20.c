@@ -302,6 +302,30 @@ int l3gd20_powerdown(struct l3gd20_dev_s *dev)
   return ERROR;
 }
 
+int l3gd20_setfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e mode)
+{
+  ASSERT(dev);
+
+  /* TODO Set mode in FIFO_CTRL_REG */
+
+  return ERROR;
+}
+
+int l3gd20_getfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e *mode)
+{
+  uint8_t regval;
+
+  ASSERT(dev);
+
+  if (l3gd20_access(dev, ST_L3GD20_FIFO_CTRL_REG, &regval, 1) != 1)
+    return ERROR;
+
+  /* Extract the FIFO mode from the register value */
+  *mode = (regval & 0xE0) >> 5;
+
+  return OK;
+}
+
 int l3gd20_setthresholds(FAR struct l3gd20_vector_s *vect)
 {
   return ERROR;

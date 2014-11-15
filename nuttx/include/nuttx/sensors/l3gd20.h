@@ -23,6 +23,14 @@ extern "C" {
  * Public Data Types
  ************************************************************************************/
 
+enum l3gd20_fifomode_e {
+  L3GD20_BYPASS_MODE           = 0,
+  L3GD20_FIFO_MODE             = 1,
+  L3GD20_STREAM_MODE           = 2,
+  L3GD20_STREAM_TO_FIFO_MODE   = 3,
+  L3GD20_BYPASS_TO_STREAM_MODE = 4
+};
+
 struct l3gd20_dev_s;
 
 struct l3gd20_vector_s {
@@ -48,6 +56,14 @@ EXTERN int l3gd20_powerup(struct l3gd20_dev_s * dev);
 /** Power down device, stop conversion */
 
 EXTERN int l3gd20_powerdown(struct l3gd20_dev_s *dev);
+
+/** Set FIFO operation mode */
+
+EXTERN int l3gd20_setfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e mode);
+
+/** Get FIFO operation mode */
+
+EXTERN int l3gd20_getfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e *mode);
 
 /** Read thresholds */
 
