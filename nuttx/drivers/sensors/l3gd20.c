@@ -57,7 +57,19 @@
  * Zen  (1 << 2)
  * Xen  (1 << 1)
  * Yen  (1 << 0)
- *
+ */
+
+/* Output Data Rate selection */
+
+#define ST_L3GD20_CTRL_REG1_DR_MASK  3
+#define ST_L3GD20_CTRL_REG1_DR_SHIFT 6
+
+/* Bandwidth selection */
+
+#define ST_L3GD20_CTRL_REG1_BW_MASK  3
+#define ST_L3GD20_CTRL_REG1_BW_SHIFT 4
+
+/*
  * CTRL_REG2
  * HPM1      (1 << 5)
  * HPM0      (1 << 4)
