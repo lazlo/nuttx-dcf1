@@ -111,7 +111,14 @@
  * WTM2      (1 << 2)
  * WTM1      (1 << 1)
  * WTM0      (1 << 0)
- *
+ */
+
+#define ST_L3GD20_FIFO_CTRL_REG_FM_MASK         0xE0
+#define ST_L3GD20_FIFO_CTRL_REG_FM_SHIFT        5
+#define ST_L3GD20_FIFO_CTRL_REG_WTM_MASK        0x1F
+#define ST_L3GD20_FIFO_CTRL_REG_WTM_SHIFT       0
+
+/*
  * FIFO_SRC_REG
  * WTM
  * OVRN
@@ -313,15 +320,18 @@ int l3gd20_setfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e mode)
 
 int l3gd20_getfifomode(struct l3gd20_dev_s *dev, enum l3gd20_fifomode_e *mode)
 {
+  const uint8_t regaddr = ST_L3GD20_FIFO_CTRL_REG;
+  const uint8_t mask    = ST_L3GD20_FIFO_CTRL_REG_FM_MASK;
+  const uint8_t shift   = ST_L3GD20_FIFO_CTRL_REG_FM_SHIFT;
   uint8_t regval;
 
   ASSERT(dev);
 
-  if (l3gd20_access(dev, ST_L3GD20_FIFO_CTRL_REG, &regval, 1) != 1)
+  if (l3gd20_access(dev, regaddr, &regval, 1) != 1)
     return ERROR;
 
   /* Extract the FIFO mode from the register value */
-  *mode = (regval & 0xE0) >> 5;
+  *mode = (regval & mask) >> shift;
 
   return OK;
 }
@@ -333,14 +343,17 @@ int l3gd20_setfifoths(struct l3gd20_dev_s *dev, uint8_t ths)
 
 int l3gd20_getfifoths(struct l3gd20_dev_s *dev, uint8_t *ths)
 {
+  const uint8_t regaddr = ST_L3GD20_FIFO_CTRL_REG;
+  const uint8_t mask    = ST_L3GD20_FIFO_CTRL_REG_WTM_MASK;
+  const uint8_t shift   = ST_L3GD20_FIFO_CTRL_REG_WTM_SHIFT;
   uint8_t regval;
 
   ASSERT(dev);
 
-  if (l3gd20_access(dev, ST_L3GD20_FIFO_CTRL_REG, &regval, 1) != 1)
+  if (l3gd20_access(dev, regaddr, &regval, 1) != 1)
     return ERROR;
 
-  *ths = regval & 0x1F;
+  *ths = (regval & mask) >> shift;
 
   return OK;
 }
