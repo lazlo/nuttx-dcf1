@@ -8,6 +8,12 @@ config LIS331DL
 	default n
 	select I2C
 
+config L3GD20
+	bool "ST L3GD20 Gyroscope"
+	default n
+	---help---
+		The driver currently only supports communication via I2C
+
 config I2C_LM75
 	bool
 	default y if LM75
